@@ -34,10 +34,10 @@ def criar_pagina_intervencao(intervencao, id_intervencao, reparacoes):
             <p>Código: {intervencao["codigo"]}</p>
             <p>Nome: {intervencao["nome"]}</p>
             <p>Descrição: {intervencao["descricao"]}</p>
-            <p>Lista de reparações onde foi executada:</p>
             <ul>
                 {criar_lista_reparacoes(reparacoes)}
             </ul>
+            <a href="../index.html">Voltar à página inicial</a>
         </body>
     </html>
     """
@@ -74,6 +74,7 @@ def criar_pagina_marca_modelo(marca, modelo, reparacoes):
             <ul>
                 {criar_lista_reparacoes(reparacoes)}
             </ul>
+            <a href="../index.html">Voltar à página inicial</a>
         </body>
     </html>
     """
@@ -101,6 +102,7 @@ def criar_pagina_reparacao(reparacao, id_reparacao):
             <ul>
                 {criar_lista_intervencoes(reparacao["intervencoes"])}
             </ul>
+            <a href="../index.html">Voltar à página inicial</a>
         </body>
     </html>
     """
