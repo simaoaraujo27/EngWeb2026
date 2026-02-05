@@ -37,7 +37,7 @@ def criar_pagina_intervencao(intervencao, id_intervencao, reparacoes):
             <ul>
                 {criar_lista_reparacoes(reparacoes)}
             </ul>
-            <a href="../index.html">Voltar à página inicial</a>
+            <a href="../lista_intervencoes.html">Voltar à lista de intervenções</a>
         </body>
     </html>
     """
@@ -74,7 +74,7 @@ def criar_pagina_marca_modelo(marca, modelo, reparacoes):
             <ul>
                 {criar_lista_reparacoes(reparacoes)}
             </ul>
-            <a href="../index.html">Voltar à página inicial</a>
+            <a href="../lista_viaturas.html">Voltar à lista de viaturas</a>
         </body>
     </html>
     """
@@ -102,7 +102,7 @@ def criar_pagina_reparacao(reparacao, id_reparacao):
             <ul>
                 {criar_lista_intervencoes(reparacao["intervencoes"])}
             </ul>
-            <a href="../index.html">Voltar à página inicial</a>
+            <a href="../lista_reparacoes.html">Voltar à lista de reparações</a>
         </body>
     </html>
     """
@@ -233,32 +233,81 @@ for viatura in lista_final_viaturas:
         """
 
 
-html = f"""
+# ----- Gerar páginas de listas -----
+
+# Página da lista de reparações
+html_lista_reparacoes = f"""
+<html>
+    <head>
+        <title>Lista de Reparações</title>
+        <meta charset="utf-8"/>
+    </head>
+    <body>
+        <h1>Lista de Reparações</h1>
+        <ul>
+            {lista_reparacoes}
+        </ul>
+        <a href="index.html">Voltar à página inicial</a>
+    </body>
+</html>
+"""
+new_file("./output/lista_reparacoes.html", html_lista_reparacoes)
+
+# Página da lista de intervenções
+html_lista_intervencoes = f"""
+<html>
+    <head>
+        <title>Lista de Intervenções</title>
+        <meta charset="utf-8"/>
+    </head>
+    <body>
+        <h1>Lista de Tipos de Intervenção</h1>
+        <ul>
+            {lista_tipos_intervencao}
+        </ul>
+        <a href="index.html">Voltar à página inicial</a>
+    </body>
+</html>
+"""
+new_file("./output/lista_intervencoes.html", html_lista_intervencoes)
+
+# Página da lista de viaturas
+html_lista_viaturas = f"""
+<html>
+    <head>
+        <title>Lista de Viaturas</title>
+        <meta charset="utf-8"/>
+    </head>
+    <body>
+        <h1>Lista das Marcas e Modelos de Carros Intervencionados</h1>
+        <ul>
+            {lista_marcas_modelos_carros}
+        </ul>
+        <a href="index.html">Voltar à página inicial</a>
+    </body>
+</html>
+"""
+new_file("./output/lista_viaturas.html", html_lista_viaturas)
+
+
+# ----- Página principal (index.html) -----
+html_index = f"""
 <html>
     <head>
         <title>Reparações</title>
         <meta charset="utf-8"/>
     </head>
-
     <body>
-        <h3>Lista das reparações</h3>
+        <h1>Página de Reparações</h1>
+        <h3>Consultar listas de:</h3>
         <ul>
-            {lista_reparacoes}
-        </ul>
-
-        <hr/>
-        
-        <h3>Lista dos tipos de intervenção</h3>
-        <ul>
-            {lista_tipos_intervencao}
-        </ul>
-
-        <h3>Lista das marcas e modelos dos carros intervencionados</h3>
-        <ul>
-            {lista_marcas_modelos_carros}
+            <li><a href="lista_reparacoes.html">Reparações</a></li>
+            <li><a href="lista_intervencoes.html">Intervenções</a></li>
+            <li><a href="lista_viaturas.html">Viaturas</a></li>
         </ul>
     </body>
 </html>
 """
 
-new_file("./output/index.html", html)
+new_file("./output/index.html", html_index)
+
