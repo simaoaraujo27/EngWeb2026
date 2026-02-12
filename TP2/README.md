@@ -4,7 +4,7 @@
 12/02/2026
 
 # Autor
-A106855, Simão Pedro da Silva Araújo
+A106855, Simão Pedro da Silva Araújo, <img src="../simao.jpg" alt="Imagem" width="150"/>
 
 # UC
 Engenharia Web
