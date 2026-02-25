@@ -1,0 +1,54 @@
+extends layout
+
+block content
+  .w3-card-4
+    header.w3-container.w3-teal
+      h2 EMD Form
+    form.w3-container(method="POST" action=emd ? `/emd/${emd.id || emd._id}` : "/emd")
+      fieldset
+        legend Basic Information
+        label
+          b First Name
+        input.w3-input.w3-border(type="text" name="nome_primeiro" value=emd ? emd.nome.primeiro : "")
+        label
+          b Last Name
+        input.w3-input.w3-border(type="text" name="nome_último" value=emd ? emd.nome.último : "")
+        label
+          b Age
+        input.w3-input.w3-border(type="number" name="idade" value=emd ? emd.idade : "")
+        label
+          b Gender
+        select.w3-select.w3-border(name="género")
+          option(value="" disabled selected=!(emd && emd.género)) Choose your gender
+          option(value="M" selected=(emd && emd.género == "M")) Male
+          option(value="F" selected=(emd && emd.género == "F")) Female
+          option(value="O" selected=(emd && emd.género == "O")) Other
+      
+      fieldset.w3-margin-top
+        legend EMD Details
+        label
+          b Date
+        input.w3-input.w3-border(type="date" name="dataEMD" value=emd ? emd.dataEMD : "")
+        label
+          b Modality
+        input.w3-input.w3-border(type="text" name="modalidade" value=emd ? emd.modalidade : "")
+        label
+          b Club
+        input.w3-input.w3-border(type="text" name="clube" value=emd ? emd.clube : "")
+        label
+          b Email
+        input.w3-input.w3-border(type="email" name="email" value=emd ? emd.email : "")
+        label
+          b Address
+        input.w3-input.w3-border(type="text" name="morada" value=emd ? emd.morada : "")
+      
+      fieldset.w3-margin-top
+        legend Results
+        input.w3-check(type="checkbox" name="federado" checked=(emd && emd.federado))
+        label  Federated
+        br
+        input.w3-check(type="checkbox" name="resultado" checked=(emd && emd.resultado))
+        label  Result (Pass)
+      
+      button.w3-btn.w3-blue.w3-margin-top.w3-margin-bottom(type="submit") Submit
+      a.w3-btn.w3-red.w3-margin-top.w3-margin-bottom.w3-margin-left(href="/") Cancel

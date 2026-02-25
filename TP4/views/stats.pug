@@ -1,0 +1,73 @@
+extends layout
+
+block content
+  .w3-card-4
+    header.w3-container.w3-teal
+      h1 EMD Statistics
+  
+  .w3-container.w3-margin-top
+    .w3-row-padding
+      .w3-half
+        .w3-card.w3-container.w3-margin-bottom
+          h3 By Gender
+          table.w3-table-all
+            tr
+              th Gender
+              th Count
+            each val, key in stats.gender
+              tr
+                td= key
+                td= val
+      
+      .w3-half
+        .w3-card.w3-container.w3-margin-bottom
+          h3 By Result
+          table.w3-table-all
+            tr
+              th Result
+              th Count
+            each val, key in stats.resultado
+              tr
+                td= key == "true" ? 'Pass' : 'Fail'
+                td= val
+
+    .w3-row-padding
+      .w3-half
+        .w3-card.w3-container.w3-margin-bottom
+          h3 By Federated
+          table.w3-table-all
+            tr
+              th Federated
+              th Count
+            each val, key in stats.federado
+              tr
+                td= key == "true" ? 'Yes' : 'No'
+                td= val
+
+    .w3-row-padding
+      .w3-half
+        .w3-card.w3-container.w3-margin-bottom
+          h3 By Modality
+          table.w3-table-all
+            tr
+              th Modality
+              th Count
+            each val, key in stats.modalidade
+              tr
+                td= key
+                td= val
+      
+      .w3-half
+        .w3-card.w3-container.w3-margin-bottom
+          h3 By Club
+          table.w3-table-all
+            tr
+              th Club
+              th Count
+            each val, key in stats.clube
+              tr
+                td= key
+                td= val
+
+  .w3-container.w3-margin-top.w3-margin-bottom
+    a.w3-button.w3-blue(href="/") Back to List
