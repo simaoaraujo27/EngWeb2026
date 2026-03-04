@@ -1,0 +1,20 @@
+
+extends layout
+
+block content
+    table.w3-table-all.w3-hoverable
+        thead
+            tr.w3-light-grey
+                th ID
+                th Título
+                th Ano
+                th #gn
+                th #cast
+        tbody
+            each f in filmes
+                tr(onclick=`window.location.href='/filmes/${f.id}'`, style="cursor:pointer")
+                    td= f.id
+                    td= f.title
+                    td= f.year
+                    td= f.genres ? f.genres.length : 0
+                    td= f.cast ? f.cast.length : 0

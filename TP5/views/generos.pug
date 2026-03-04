@@ -1,0 +1,14 @@
+
+extends layout
+
+block content
+    table.w3-table-all.w3-hoverable
+        thead
+            tr.w3-light-grey
+                th Género
+                th Número de Filmes
+        tbody
+            each g in generos
+                tr(onclick=`window.location.href='/generos/${g.id}'`, style="cursor:pointer")
+                    td= g.name
+                    td= g.filmes ? g.filmes.length : 0

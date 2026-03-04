@@ -1,0 +1,14 @@
+
+extends layout
+
+block content
+    table.w3-table-all.w3-hoverable
+        thead
+            tr.w3-light-grey
+                th Ator
+                th Número de Filmes
+        tbody
+            each a in atores
+                tr(onclick=`window.location.href='/atores/${a.id}'`, style="cursor:pointer")
+                    td= a.name
+                    td= a.filmes ? a.filmes.length : 0

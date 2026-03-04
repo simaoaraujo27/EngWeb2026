@@ -1,0 +1,21 @@
+{
+  "name": "tp5",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "json-server": "json-server --watch db.json --port 3000",
+    "dev": "npm run json-server & npm start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.13.6",
+    "express": "^5.2.1",
+    "json-server": "^1.0.0-beta.12",
+    "pug": "^3.0.3"
+  }
+}

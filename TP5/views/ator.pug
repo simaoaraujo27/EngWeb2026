@@ -1,0 +1,18 @@
+
+extends layout
+
+block content
+    div.w3-container
+        p 
+            b Nome: 
+            span= ator.name
+        p 
+            b Filmes:
+        ul
+            if ator.filmes && ator.filmes.length > 0
+                each f in ator.filmes.sort((a,b) => (a.title||'').localeCompare(b.title||''))
+                    li
+                        a(href=`/filmes/${f.id}`)= f.title
+            else
+                li N/A
+    a.w3-button.w3-blue.w3-margin-top(href="/atores") Voltar

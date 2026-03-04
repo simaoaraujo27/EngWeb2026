@@ -1,0 +1,21 @@
+
+extends layout
+
+block content
+    div.w3-container
+        p 
+            b Ano: 
+            span= filme.year
+        p 
+            b Géneros: 
+            span= (filme.genres || []).sort().join(', ') || 'N/A'
+        p 
+            b Cast:
+        ul
+            if filme.cast && filme.cast.length > 0
+                each c in filme.cast.sort()
+                    li
+                        a(href=`/atores/${c.replace(/ /g, '_').replace(/\//g, '_')}`)= c
+            else
+                li N/A
+    a.w3-button.w3-blue.w3-margin-top(href="/filmes") Voltar

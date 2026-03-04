@@ -1,0 +1,18 @@
+
+extends layout
+
+block content
+    div.w3-container
+        p 
+            b Género: 
+            span= genero.name
+        p 
+            b Filmes:
+        ul
+            if genero.filmes && genero.filmes.length > 0
+                each f in genero.filmes.sort((a,b) => (a.title||'').localeCompare(b.title||''))
+                    li
+                        a(href=`/filmes/${f.id}`)= f.title
+            else
+                li N/A
+    a.w3-button.w3-blue.w3-margin-top(href="/generos") Voltar

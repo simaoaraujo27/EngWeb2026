@@ -1,0 +1,19 @@
+
+doctype html
+html
+    head
+        title= title
+        meta(charset="utf-8")
+        link(rel="stylesheet", href="/css/w3.css")
+    body
+        div.w3-card-4
+            header.w3-container.w3-blue
+                h1= title
+            nav.w3-bar.w3-dark-grey
+                a.w3-bar-item.w3-button(href="/filmes") Filmes
+                a.w3-bar-item.w3-button(href="/atores") Atores
+                a.w3-bar-item.w3-button(href="/generos") Géneros
+            div.w3-container
+                block content
+            footer.w3-container.w3-blue
+                h5 TP5 - Cinema Database - EngWeb2026
