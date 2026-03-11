@@ -1,0 +1,10 @@
+{
+  "name": "cinema-api",
+  "version": "1.0.0",
+  "description": "API para o TPC6 de EngWeb",
+  "main": "myServer.js",
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongoose": "^9.2.4"
+  }
+}

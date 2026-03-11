@@ -1,0 +1,11 @@
+{
+  "name": "cinema-interface",
+  "version": "1.0.0",
+  "description": "Interface para o TPC6 de EngWeb",
+  "main": "app_interface.js",
+  "dependencies": {
+    "axios": "^1.13.6",
+    "express": "^5.2.1",
+    "pug": "^3.0.3"
+  }
+}

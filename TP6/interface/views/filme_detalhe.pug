@@ -1,0 +1,28 @@
+extends layout
+
+block content
+  .w3-container
+    h2= filme.title
+    .w3-card-4.w3-margin
+      header.w3-container.w3-teal
+        h3 Detalhes do Filme
+      .w3-container.w3-padding
+        p
+          b ID: 
+          span= filme._id
+        p
+          b Ano: 
+          span= filme.year
+        p
+          b Elenco:
+          ul
+            each actor in filme.cast
+              - var actor_id = actor.toLowerCase().replace(/[\W_]+/g, '_').replace(/^_+|_+$/g, '')
+              li
+                a(href=`/atores/${actor_id}`)= actor
+        p
+          b Géneros:
+          ul
+            each genre in filme.genres
+              li= genre
+    a.w3-button.w3-blue-grey.w3-margin(href='/filmes') Voltar à Lista

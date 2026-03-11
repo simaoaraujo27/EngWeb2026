@@ -1,0 +1,18 @@
+doctype html
+html
+  head
+    title Cinema Americano
+    meta(charset='UTF-8')
+    link(rel='stylesheet' href='/stylesheets/style.css')
+  body
+    header.w3-container.w3-teal
+      h1 Cinema Americano
+      nav.w3-bar.w3-black
+        a.w3-bar-item.w3-button(href='/filmes') Filmes
+        a.w3-bar-item.w3-button(href='/atores') Atores
+        a.w3-bar-item.w3-button(href='/generos') Géneros
+    
+    block content
+
+    footer.w3-container.w3-teal.w3-margin-top
+      h5 Gerado por EngWeb2026 em #{date}

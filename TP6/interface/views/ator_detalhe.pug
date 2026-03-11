@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  .w3-container
+    h2= ator.nome
+    .w3-card-4.w3-margin
+      header.w3-container.w3-teal
+        h3 Detalhes do Ator
+      .w3-container.w3-padding
+        p
+          b ID: 
+          span= ator._id
+        p
+          b Filmes em que participou:
+          ul
+            each f in ator.filmes
+              li
+                a(href=`/filmes/${f.id}`)= f.title
+    a.w3-button.w3-blue-grey.w3-margin(href='/atores') Voltar à Lista
