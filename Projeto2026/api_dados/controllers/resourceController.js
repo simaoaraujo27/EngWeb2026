@@ -1,0 +1,47 @@
+const Resource = require('../models/resource');
+
+// Listar todos os recursos
+module.exports.list = () => {
+    return Resource.find().sort({ dataRegisto: -1 }).exec();
+};
+
+// Consultar um recurso por ID
+module.exports.getResource = id => {
+    return Resource.findOne({ _id: id }).exec();
+};
+
+// Inserir um novo recurso
+module.exports.insert = r => {
+    const newResource = new Resource(r);
+    return newResource.save();
+};
+
+// Atualizar um recurso
+module.exports.update = (id, r) => {
+    return Resource.findByIdAndUpdate(id, r, { new: true }).exec();
+};
+
+// Remover um recurso
+module.exports.remove = id => {
+    return Resource.findByIdAndDelete(id).exec();
+};
+
+// Listar por tipo
+module.exports.listByType = t => {
+    return Resource.find({ tipo: t }).exec();
+};
+
+// Listar por hashtag
+module.exports.listByHashtag = h => {
+    return Resource.find({ hashtags: h }).exec();
+};
+
+// Incrementar contador de downloads
+module.exports.incDownloads = id => {
+    return Resource.findByIdAndUpdate(id, { $inc: { downloads: 1 } }, { new: true }).exec();
+};
+
+// Obter Top 3 mais descarregados
+module.exports.top3 = () => {
+    return Resource.find({ visibilidade: 'público' }).sort({ downloads: -1 }).limit(3).exec();
+};

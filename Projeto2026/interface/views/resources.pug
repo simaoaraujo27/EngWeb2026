@@ -1,0 +1,39 @@
+extends layout
+
+block content
+  .w3-card-4.w3-margin
+    .w3-container.w3-teal
+      h2 Recursos Educativos Disponíveis
+    
+    .w3-container.w3-padding-16
+      // Filtros Rápidos
+      .w3-bar.w3-light-grey.w3-border.w3-margin-bottom
+        a.w3-bar-item.w3-button(href='/resources') Todos
+        a.w3-bar-item.w3-button(href='/resources?tipo=tese') Teses
+        a.w3-bar-item.w3-button(href='/resources?tipo=artigo') Artigos
+        a.w3-bar-item.w3-button(href='/resources?tipo=slides') Slides
+        a.w3-bar-item.w3-button(href='/resources?tipo=aplicacao') Aplicações
+
+      if resources.length > 0
+        table.w3-table-all.w3-hoverable
+          thead
+            tr.w3-blue-grey
+              th Título
+              th Tipo
+              th Autor/Produtor
+              th Data Registo
+              th Ações
+          tbody
+            each r in resources
+              tr
+                td= r.titulo
+                td
+                  span.w3-tag.w3-teal.w3-round= r.tipo
+                td= r.produtor
+                td= new Date(r.dataRegisto).toLocaleDateString()
+                td
+                  a.w3-button.w3-small.w3-blue(href=`/resources/${r._id}`) 
+                    i.fa.fa-eye  Ver Detalhes
+      else
+        .w3-panel.w3-pale-blue.w3-leftbar.w3-border-blue
+          p Não foram encontrados recursos.

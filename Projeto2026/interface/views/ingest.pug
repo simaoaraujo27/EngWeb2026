@@ -1,0 +1,54 @@
+extends layout
+
+block content
+  .w3-card-4.w3-margin
+    .w3-container.w3-teal
+      h2 Ingestão de Recurso (SIP)
+    
+    form.w3-container.w3-padding-16(action="/ingest" method="POST" enctype="multipart/form-data")
+      label.w3-text-teal
+        b Título do Recurso
+      input.w3-input.w3-border.w3-light-grey(type="text" name="titulo" required)
+      
+      label.w3-text-teal
+        b Subtítulo (opcional)
+      input.w3-input.w3-border.w3-light-grey(type="text" name="subtitulo")
+      
+      .w3-row-padding.w3-margin-top
+        .w3-half
+          label.w3-text-teal
+            b Tipo de Recurso
+          select.w3-select.w3-border(name="tipo" required)
+            option(value="" disabled selected) Selecione um tipo
+            option(value="tese") Tese
+            option(value="artigo") Artigo
+            option(value="slides") Slides
+            option(value="relatorio") Relatório
+            option(value="aplicacao") Aplicação
+            option(value="outro") Outro
+        .w3-half
+          label.w3-text-teal
+            b Data de Criação
+          input.w3-input.w3-border(type="date" name="dataCriacao")
+
+      label.w3-text-teal.w3-margin-top
+        b Hashtags (separadas por vírgula)
+      input.w3-input.w3-border(type="text" name="hashtags" placeholder="ex: javascript, web, aula")
+
+      label.w3-text-teal.w3-margin-top
+        b Visibilidade
+      .w3-row
+        input.w3-radio(type="radio" name="visibilidade" value="público" checked)
+        label.w3-margin-right  Público
+        input.w3-radio(type="radio" name="visibilidade" value="privado")
+        label  Privado
+
+      hr
+      label.w3-text-teal
+        b Pacote SIP (Ficheiro ZIP com Manifesto)
+      input.w3-input.w3-border(type="file" name="zipFile" accept=".zip" required)
+      
+      // Campo temporário para o produtor (enquanto não há login)
+      input(type="hidden" name="produtor" value="admin@eduportal.pt")
+
+      button.w3-btn.w3-teal.w3-margin-top(type="submit") Submeter Recurso

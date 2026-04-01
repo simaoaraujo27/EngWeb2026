@@ -1,0 +1,44 @@
+extends layout
+
+block content
+  .w3-card-4.w3-margin
+    header.w3-container.w3-red
+      h2 Painel de Administração
+      a.w3-button.w3-white.w3-right.w3-margin-bottom(href="/admin/export") 
+        i.fa.fa-download  Exportação Global (Backup)
+    
+    .w3-container.w3-padding-16
+      .w3-row-padding
+        // Gestão de Utilizadores
+        .w3-half
+          h3 Utilizadores
+          table.w3-table-all.w3-hoverable
+            thead
+              tr.w3-blue-grey
+                th Nome
+                th Nível
+                th Ação
+            tbody
+              each u in users
+                tr
+                  td= u.nome
+                  td= u.nivel
+                  td
+                    a.w3-button.w3-red.w3-small(href=`/admin/delete-user/${u._id}` onclick="return confirm('Tem a certeza?')") Eliminar
+        
+        // Gestão de Recursos
+        .w3-half
+          h3 Recursos
+          table.w3-table-all.w3-hoverable
+            thead
+              tr.w3-blue-grey
+                th Título
+                th Downloads
+                th Ação
+            tbody
+              each r in resources
+                tr
+                  td= r.titulo
+                  td= r.downloads
+                  td
+                    a.w3-button.w3-red.w3-small(href=`/admin/delete-resource/${r._id}` onclick="return confirm('Tem a certeza?')") Eliminar

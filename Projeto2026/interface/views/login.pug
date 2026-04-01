@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  .w3-card-4.w3-margin.w3-display-middle(style="width:40%; min-width:300px;")
+    .w3-container.w3-teal
+      h2 Login
+    
+    if error
+      .w3-container.w3-red.w3-margin.w3-padding
+        p= error
+
+    form.w3-container.w3-padding-16(action="/login" method="POST")
+      label.w3-text-teal
+        b Email / ID
+      input.w3-input.w3-border.w3-light-grey(type="text" name="_id" required)
+      
+      label.w3-text-teal
+        b Password
+      input.w3-input.w3-border.w3-light-grey(type="password" name="password" required)
+      
+      button.w3-btn.w3-teal.w3-margin-top.w3-block(type="submit") Entrar
+    
+    .w3-container.w3-border-top.w3-padding-16.w3-light-grey.w3-center
+      p Ainda não tens conta? 
+        a(href="/register") Regista-te aqui

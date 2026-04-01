@@ -1,0 +1,34 @@
+extends layout
+
+block content
+  .w3-row
+    .w3-col.l8.m12
+      .w3-card-4.w3-margin
+        .w3-container.w3-teal
+          h2 Feed de Notícias
+        .w3-container.w3-white
+          if news.length > 0
+            ul.w3-ul.w3-hoverable
+              each n in news
+                li.w3-padding-16
+                  span.w3-large= n.conteudo
+                  br
+                  span.w3-text-grey= new Date(n.data).toLocaleString()
+          else
+            p.w3-padding-16 Não há notícias de momento.
+
+    .w3-col.l4.m12
+      .w3-card-4.w3-margin
+        .w3-container.w3-blue-grey
+          h2 Top 3 Downloads
+        .w3-container.w3-white.w3-padding-16
+          if top.length > 0
+            ul.w3-ul.w3-border
+              each r in top
+                li
+                  a(href=`/resources/${r._id}`) 
+                    b= r.titulo
+                  br
+                  span.w3-small.w3-text-grey= r.downloads + ' downloads'
+          else
+            p Ainda não há downloads.

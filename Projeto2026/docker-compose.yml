@@ -1,0 +1,43 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/db:/data/db
+    networks:
+      - projeto_network
+
+  api_dados:
+    build: ./api_dados
+    command: npm run dev
+    ports:
+      - "16000:16000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/projetoEW
+    depends_on:
+      - mongodb
+    volumes:
+      - ./api_dados:/usr/src/app
+      - /usr/src/app/node_modules # Impede que o host sobrescreva os módulos do container
+    networks:
+      - projeto_network
+
+  interface:
+    build: ./interface
+    command: npm run dev
+    ports:
+      - "16001:16001"
+    environment:
+      - API_URL=http://api_dados:16000
+    depends_on:
+      - api_dados
+    volumes:
+      - ./interface:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - projeto_network
+
+networks:
+  projeto_network:
+    driver: bridge
