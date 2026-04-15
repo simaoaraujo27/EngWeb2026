@@ -1,44 +1,73 @@
 extends layout
 
 block content
-  .w3-card-4.w3-margin
-    header.w3-container.w3-red
-      h2 Painel de Administração
-      a.w3-button.w3-white.w3-right.w3-margin-bottom(href="/admin/export") 
-        i.fa.fa-download  Exportação Global (Backup)
-    
-    .w3-container.w3-padding-16
-      .w3-row-padding
-        // Gestão de Utilizadores
-        .w3-half
-          h3 Utilizadores
-          table.w3-table-all.w3-hoverable
-            thead
-              tr.w3-blue-grey
-                th Nome
-                th Nível
-                th Ação
-            tbody
-              each u in users
-                tr
-                  td= u.nome
-                  td= u.nivel
-                  td
-                    a.w3-button.w3-red.w3-small(href=`/admin/delete-user/${u._id}` onclick="return confirm('Tem a certeza?')") Eliminar
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
+    div(class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12")
+      div
+        h1(class="text-3xl font-extrabold text-edu-dark") Painel de Administração
+        p(class="text-edu-muted") Gestão centralizada de utilizadores e recursos do sistema.
+      
+      a(href="/admin/export" class="inline-flex items-center gap-2 px-6 py-3 bg-edu-dark text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg")
+        i(data-lucide="archive" class="w-5 h-5")
+        | Exportação Global (Backup)
+
+    div(class="grid grid-cols-1 xl:grid-cols-2 gap-8")
+      // Users Management
+      div(class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden")
+        div(class="p-8 border-b border-gray-50 flex items-center justify-between")
+          div(class="flex items-center gap-3")
+            div(class="p-2 bg-purple-100 rounded-lg")
+              i(data-lucide="users" class="text-purple-600 w-5 h-5")
+            h2(class="text-xl font-bold text-edu-dark") Utilizadores
+          span(class="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold")= users.length
         
-        // Gestão de Recursos
-        .w3-half
-          h3 Recursos
-          table.w3-table-all.w3-hoverable
-            thead
-              tr.w3-blue-grey
-                th Título
-                th Downloads
-                th Ação
-            tbody
+        div(class="overflow-x-auto")
+          table(class="w-full")
+            thead(class="bg-gray-50")
+              tr
+                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 uppercase") Nome
+                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 uppercase") Nível
+                th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 uppercase") Ações
+            tbody(class="divide-y divide-gray-50")
+              each u in users
+                tr(class="hover:bg-gray-50/50 transition-colors")
+                  td(class="px-8 py-4")
+                    p(class="text-sm font-bold text-edu-dark")= u.nome
+                    p(class="text-xs text-gray-400")= u._id
+                  td(class="px-8 py-4")
+                    span(class="px-2 py-1 rounded-md text-[10px] font-bold uppercase " + (u.nivel=='admin' ? 'bg-red-50 text-red-600' : (u.nivel=='produtor' ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-600')))
+                      = u.nivel
+                  td(class="px-8 py-4 text-right")
+                    a(href=`/admin/delete-user/${u._id}` class="p-2 text-gray-400 hover:text-red-600 transition-colors" onclick="return confirm('Eliminar utilizador permanentemente?')")
+                      i(data-lucide="trash-2" class="w-4 h-4")
+
+      // Resources Management
+      div(class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden")
+        div(class="p-8 border-b border-gray-50 flex items-center justify-between")
+          div(class="flex items-center gap-3")
+            div(class="p-2 bg-blue-100 rounded-lg")
+              i(data-lucide="package" class="text-blue-600 w-5 h-5")
+            h2(class="text-xl font-bold text-edu-dark") Recursos
+          span(class="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold")= resources.length
+        
+        div(class="overflow-x-auto")
+          table(class="w-full")
+            thead(class="bg-gray-50")
+              tr
+                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 uppercase") Título
+                th(class="px-8 py-4 text-center text-xs font-bold text-gray-400 uppercase") Downloads
+                th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 uppercase") Ações
+            tbody(class="divide-y divide-gray-50")
               each r in resources
-                tr
-                  td= r.titulo
-                  td= r.downloads
-                  td
-                    a.w3-button.w3-red.w3-small(href=`/admin/delete-resource/${r._id}` onclick="return confirm('Tem a certeza?')") Eliminar
+                tr(class="hover:bg-gray-50/50 transition-colors")
+                  td(class="px-8 py-4")
+                    p(class="text-sm font-bold text-edu-dark truncate max-w-[200px]")= r.titulo
+                    p(class="text-[10px] text-gray-400")= r.tipo
+                  td(class="px-8 py-4 text-center")
+                    span(class="text-sm font-medium text-gray-600")= r.downloads
+                  td(class="px-8 py-4 text-right")
+                    div(class="flex justify-end gap-2")
+                      a(href=`/resources/${r._id}` class="p-2 text-gray-400 hover:text-primary transition-colors")
+                        i(data-lucide="eye" class="w-4 h-4")
+                      a(href=`/admin/delete-resource/${r._id}` class="p-2 text-gray-400 hover:text-red-600 transition-colors" onclick="return confirm('Eliminar recurso permanentemente?')")
+                        i(data-lucide="trash-2" class="w-4 h-4")

@@ -1,78 +1,132 @@
 extends layout
 
 block content
-  .w3-row-padding
-    // Coluna da Esquerda: Detalhes do Recurso
-    .w3-col.l8.m12
-      .w3-card-4
-        header.w3-container.w3-teal
-          h2= resource.titulo
-          if resource.subtitulo
-            h4= resource.subtitulo
-        
-        .w3-container.w3-padding-16
-          p
-            b Tipo: 
-            span.w3-tag.w3-teal.w3-round= resource.tipo
-          p
-            b Autor: 
-            span= resource.produtor
-          p
-            b Data de Criação: 
-            span= resource.dataCriacao ? new Date(resource.dataCriacao).toLocaleDateString() : 'N/A'
-          p
-            b Hashtags: 
-            each tag in resource.hashtags
-              a.w3-tag.w3-blue-grey.w3-tiny.w3-margin-right(href=`/resources?hashtag=${tag}`)= tag
-          
-          hr
-          h3 Conteúdo do Pacote
-          ul.w3-ul.w3-border
-            each file in resource.files
-              li.w3-padding-16
-                i.fa.fa-file.w3-margin-right
-                span= file.nome
-                span.w3-right.w3-text-grey #{Math.round(file.size / 1024)} KB
-          
-          .w3-margin-top
-            a.w3-btn.w3-blue-grey(href=`/resources/download/${resource._id}`) 
-              i.fa.fa-download  Download (DIP)
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8")
+    // Breadcrumb / Back
+    a(href="/resources" class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-primary mb-8 transition-colors")
+      i(data-lucide="arrow-left" class="w-4 h-4")
+      | Voltar aos Recursos
 
-    // Coluna da Direita: Comentários e Ranking
-    .w3-col.l4.m12
-      .w3-card-4
-        header.w3-container.w3-blue-grey
-          h2 Interações
-        
-        .w3-container.w3-padding-16
-          h4 Classificação
+    div(class="grid grid-cols-1 lg:grid-cols-3 gap-8")
+      // Main Column
+      div(class="lg:col-span-2 space-y-8")
+        // Resource Header Card
+        div(class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden")
+          div(class="p-8")
+            div(class="flex flex-col md:flex-row gap-6")
+              div(class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0")
+                if resource.tipo == 'slides'
+                  | 📊
+                else if resource.tipo == 'tese'
+                  | 🎓
+                else if resource.tipo == 'artigo'
+                  | 📝
+                else if resource.tipo == 'aplicacao'
+                  | 💻
+                else
+                  | 📄
+              div(class="flex-1")
+                div(class="flex items-center gap-3 mb-2")
+                  span(class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-primary/10 text-primary")= resource.tipo
+                  span(class="text-xs text-gray-400") •
+                  span(class="text-xs text-gray-400")= new Date(resource.dataRegisto).toLocaleDateString()
+                
+                h1(class="text-3xl font-bold text-edu-dark mb-2")= resource.titulo
+                if resource.subtitulo
+                  p(class="text-xl text-gray-500 mb-6")= resource.subtitulo
+                
+                div(class="flex flex-wrap gap-4 text-sm text-gray-600")
+                  span(class="flex items-center gap-1.5")
+                    i(data-lucide="user" class="w-4 h-4 text-gray-400")
+                    | #{resource.produtor}
+                  span(class="flex items-center gap-1.5")
+                    i(data-lucide="download" class="w-4 h-4 text-gray-400")
+                    | #{resource.downloads} downloads
+            
+            hr(class="my-8 border-gray-100")
+
+            // Actions & Description
+            div(class="flex flex-wrap gap-3 mb-8")
+              a(href=`/resources/download/${resource._id}` class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all shadow-md")
+                i(data-lucide="download-cloud" class="w-5 h-5")
+                | Transferir ZIP (DIP)
+              button(class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all")
+                i(data-lucide="share-2" class="w-5 h-5")
+                | Partilhar
+
+            div(class="prose max-w-none text-gray-700")
+              h3(class="text-lg font-bold text-edu-dark mb-3") Metadados e Tags
+              div(class="flex flex-wrap gap-2")
+                each tag in resource.hashtags
+                  a(href=`/resources?hashtag=${tag}` class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-primary hover:text-white transition-all") # #{tag}
+
+        // Files Card
+        div(class="bg-white rounded-3xl border border-gray-100 shadow-sm")
+          div(class="p-8")
+            div(class="flex items-center gap-3 mb-6")
+              i(data-lucide="files" class="text-primary w-6 h-6")
+              h2(class="text-xl font-bold text-edu-dark") Conteúdo do Pacote
+            
+            div(class="space-y-3")
+              each file in resource.files
+                div(class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-primary/20 transition-all group")
+                  div(class="flex items-center gap-4")
+                    div(class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm")
+                      i(data-lucide="file-text" class="text-gray-400 w-5 h-5")
+                    div
+                      p(class="text-sm font-bold text-edu-dark")= file.nome
+                      p(class="text-xs text-gray-400") #{Math.round(file.size / 1024)} KB
+                  button(class="p-2 text-gray-400 hover:text-primary transition-colors")
+                    i(data-lucide="external-link" class="w-5 h-5")
+
+      // Sidebar Column
+      div(class="space-y-8")
+        // Interaction Card (Rating)
+        div(class="bg-white rounded-3xl border border-gray-100 shadow-sm p-8")
+          h3(class="text-lg font-bold text-edu-dark mb-6") Avaliação da Comunidade
+          div(class="flex items-center gap-4 mb-8")
+            div(class="text-5xl font-extrabold text-primary")= ratingAverage
+            div
+              div(class="flex gap-1 text-orange-400 mb-1")
+                - var n = 0;
+                while n < Math.floor(ratingAverage)
+                  i(data-lucide="star" class="w-5 h-5 fill-current")
+                  - n++
+                while n < 5
+                  i(data-lucide="star" class="w-5 h-5 text-gray-200")
+                  - n++
+              p(class="text-xs text-gray-400") Baseado em #{ratingCount} avaliações
+          
           form(action=`/resources/rating/${resource._id}` method="POST")
-            select.w3-select.w3-border(name="estrelas" onchange="this.form.submit()")
-              option(value="" disabled selected) Atribuir estrelas
-              option(value="5") 5 Estrelas
-              option(value="4") 4 Estrelas
-              option(value="3") 3 Estrelas
-              option(value="2") 2 Estrelas
-              option(value="1") 1 Estrela
+            label(class="block text-sm font-bold text-gray-700 mb-3") Atribui a tua nota:
+            div(class="flex justify-between gap-2")
+              each val in [1, 2, 3, 4, 5]
+                button(class="flex-1 py-2 rounded-lg border border-gray-200 text-sm font-bold hover:border-primary hover:text-primary transition-all" type="submit" name="estrelas" value=val)
+                  = val
+
+        // Posts / Comments Section
+        div(class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden")
+          div(class="p-8 border-b border-gray-50 flex items-center justify-between")
+            h3(class="text-lg font-bold text-edu-dark") Discussão
+            span(class="px-2 py-1 bg-gray-100 text-gray-500 rounded-md text-xs font-bold")= posts.length
           
-          hr
-          h4 Posts e Comentários
-          if posts.length > 0
-            each p in posts
-              .w3-container.w3-border-bottom.w3-padding
-                p.w3-small
-                  b= p.userId 
-                  span.w3-text-grey  em #{new Date(p.data).toLocaleString()}
-                p= p.conteudo
-                if p.ratings && p.ratings.length > 0
-                   p.w3-small.w3-text-orange
-                     each r in p.ratings
-                       i.fa.fa-star  #{r.estrelas} estrelas por #{r.userId}
-          else
-            p Não existem posts sobre este recurso.
-          
-          form.w3-container.w3-light-grey.w3-padding-16.w3-margin-top(action=`/resources/post/${resource._id}` method="POST")
-            label.w3-text-teal
-              b Novo Post
-            textarea.w3-input.w3-border(name="conteudo" rows="3" placeholder="O que achas deste recurso?" required)
-            button.w3-btn.w3-teal.w3-margin-top.w3-right(type="submit") Comentar
+          div(class="p-8 bg-gray-50/50")
+            if posts.length > 0
+              div(class="space-y-6")
+                each p in posts
+                  div(class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100")
+                    div(class="flex items-center gap-3 mb-3")
+                      div(class="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center text-xs font-bold")
+                        = p.userId.charAt(0).toUpperCase()
+                      div
+                        p(class="text-xs font-bold text-edu-dark")= p.userId.split('@')[0]
+                        p(class="text-[10px].text-gray-400")= new Date(p.data).toLocaleString()
+                    p(class="text-sm text-gray-700 leading-relaxed")= p.conteudo
+            else
+              p(class="text-center text-sm text-gray-400 py-8") Ainda não há comentários.
+
+          div(class="p-8 border-t border-gray-100")
+            form(class="space-y-4" action=`/resources/post/${resource._id}` method="POST")
+              textarea(class="w-full p-4 bg-white border border-gray-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" name="conteudo" rows="3" placeholder="Escreve a tua opinião..." required)
+              button(class="w-full py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all shadow-sm" type="submit")
+                | Publicar Post

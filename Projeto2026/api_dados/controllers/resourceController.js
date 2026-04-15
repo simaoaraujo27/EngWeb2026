@@ -45,3 +45,10 @@ module.exports.incDownloads = id => {
 module.exports.top3 = () => {
     return Resource.find({ visibilidade: 'público' }).sort({ downloads: -1 }).limit(3).exec();
 };
+
+// Contar recursos criados nos últimos 30 dias
+module.exports.countLastMonth = () => {
+    const lastMonth = new Date();
+    lastMonth.setDate(lastMonth.getDate() - 30);
+    return Resource.countDocuments({ dataRegisto: { $gte: lastMonth } }).exec();
+};

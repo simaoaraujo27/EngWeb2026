@@ -1,36 +1,92 @@
 doctype html
-html
+html(lang="pt")
   head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title= title
-    link(rel='stylesheet', href='https://www.w3schools.com/w3css/4/w3.css')
+    script(src="https://cdn.tailwindcss.com")
+    script.
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#2563eb',
+              'primary-dark': '#1d4ed8',
+              'edu-dark': '#030213',
+              'edu-muted': '#717182',
+              'edu-bg': '#f3f3f5'
+            },
+            borderRadius: {
+              'xl': '0.75rem',
+              '2xl': '1rem',
+            }
+          }
+        }
+      }
     link(rel='stylesheet', href='/stylesheets/style.css')
-    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css')
-  body
-    // Navbar
-    .w3-bar.w3-teal
-      a.w3-bar-item.w3-button(href='/') 
-        b EduPortal
-      a.w3-bar-item.w3-button(href='/resources') Recursos
-      
-      // Obter user dos cookies (passado pelo router)
-      if user
-        if user.nivel == 'admin'
-          a.w3-bar-item.w3-button(href='/admin') Admin
-        if user.nivel == 'produtor' || user.nivel == 'admin'
-          a.w3-bar-item.w3-button(href='/ingest') Ingestão (SIP)
-        
-        .w3-right
-          span.w3-bar-item.w3-text-white Olá, #{user.nome} (#{user.nivel})
-          a.w3-bar-item.w3-button(href='/logout') Logout
-      else
-        .w3-right
-          a.w3-bar-item.w3-button(href='/login') Login
-          a.w3-bar-item.w3-button(href='/register') Registar
-    
-    // Content
-    .w3-container.w3-margin-top
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet")
+    script(src="https://unpkg.com/lucide@latest")
+  
+  body(class="min-h-screen flex flex-col")
+    // Header
+    header(class="bg-white border-b border-gray-200 sticky top-0 z-50")
+      div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8")
+        div(class="flex items-center justify-between h-16")
+          // Logo
+          a(href="/" class="flex items-center gap-3")
+            div(class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center")
+              i(data-lucide="book-open" class="text-white w-6 h-6")
+            div(class="hidden sm:block")
+              div(class="font-bold text-edu-dark text-lg") EduPortal
+              div(class="text-xs text-edu-muted") Plataforma Educativa
+          
+          // Desktop Nav
+          nav(class="hidden md:flex items-center gap-2")
+            a(href="/" class="px-3.py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md transition-colors") Início
+            a(href="/resources" class="px-3.py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md transition-colors") Recursos
+            if user
+              if user.nivel == 'admin'
+                a(href="/admin" class="px-3.py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md transition-colors") Dashboard
+              if user.nivel == 'produtor' || user.nivel == 'admin'
+                a(href="/ingest" class="px-3.py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md transition-colors") Submeter
+          
+          // User Actions
+          div(class="flex items-center gap-3")
+            if user
+              div(class="hidden sm:flex items-center gap-2 mr-2")
+                div(class="w-8.h-8 bg-edu-bg rounded-full flex items-center justify-center text-primary font-bold text-xs")
+                  = user.nome.charAt(0)
+                span(class="text-sm font-medium text-gray-700")= user.nome.split(' ')[0]
+              a(href="/logout" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all")
+                i(data-lucide="log-out" class="w-4 h-4")
+                span(class="hidden sm:inline") Sair
+            else
+              a(href="/login" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary") Entrar
+              a(href="/register" class="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-all shadow-sm") Registar
+
+    // Main Content
+    main(class="flex-grow")
       block content
 
     // Footer
-    footer.w3-container.w3-teal.w3-center.w3-margin-top
-      p EduPortal &copy; 2026 - Engenharia Web
+    footer(class="bg-white border-t border-gray-200 mt-16")
+      div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
+        div(class="grid grid-cols-1 md:grid-cols-3 gap-12")
+          div
+            div(class="font-bold text-edu-dark mb-4") EduPortal
+            p(class="text-sm text-edu-muted") Plataforma de gestão e disponibilização de recursos educativos para a comunidade académica.
+          div
+            div(class="font-bold text-edu-dark mb-4") Links Úteis
+            div(class="flex flex-col gap-2 text-sm text-edu-muted")
+              a(href="/resources" class="hover:text-primary") Explorar Recursos
+              a(href="/ingest" class="hover:text-primary") Submeter Material
+          div
+            div(class="font-bold text-edu-dark mb-4") Contacto
+            p(class="text-sm text-edu-muted") Departamento de Informática<br>Universidade do Minho<br>suporte@eduportal.pt
+        div(class="mt-12 pt-8 border-t border-gray-100 text-center text-xs text-edu-muted")
+          | &copy; 2026 EduPortal. Todos os direitos reservados. Engenharia Web.
+
+    script.
+      lucide.createIcons();

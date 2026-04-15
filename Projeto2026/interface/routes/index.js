@@ -11,7 +11,12 @@ const upload = multer({ dest: 'uploads/' });
 // Middleware para passar dados do utilizador para as vistas PUG
 router.use((req, res, next) => {
     if (req.cookies.user) {
-        res.locals.user = JSON.parse(req.cookies.user);
+        try {
+            res.locals.user = JSON.parse(req.cookies.user);
+        } catch (e) {
+            console.error('Error parsing user cookie:', e);
+            res.locals.user = null;
+        }
     }
     next();
 });
@@ -19,13 +24,20 @@ router.use((req, res, next) => {
 // Página Principal (News Feed)
 router.get('/', async (req, res) => {
     try {
-        const [newsResponse, topResponse] = await Promise.all([
+        const [newsResponse, topResponse, statsResponse] = await Promise.all([
             axios.get(`${API_URL}/news`),
-            axios.get(`${API_URL}/resources?top=true`)
+            axios.get(`${API_URL}/resources?top=true`),
+            axios.get(`${API_URL}/admin/stats`)
         ]);
-        res.render('index', { title: 'EduPortal - Recursos Educativos', news: newsResponse.data, top: topResponse.data });
+
+        res.render('index', { 
+            title: 'EduPortal - Recursos Educativos', 
+            news: newsResponse.data, 
+            top: topResponse.data,
+            stats: statsResponse.data
+        });
     } catch (error) {
-        res.render('error', { message: 'Erro ao carregar notícias', error: error });
+        res.render('error', { message: 'Erro ao carregar notícias e estatísticas', error: error });
     }
 });
 
@@ -82,28 +94,17 @@ router.get('/resources', async (req, res) => {
         else if (req.query.hashtag) queryParams = `?hashtag=${req.query.hashtag}`;
         
         const response = await axios.get(`${API_URL}/resources${queryParams}`);
-        res.render('resources', { title: 'EduPortal - Listagem de Recursos', resources: response.data });
+        res.render('resources', { 
+            title: 'EduPortal - Listagem de Recursos', 
+            resources: response.data,
+            queryTipo: req.query.tipo 
+        });
     } catch (error) {
         res.render('error', { message: 'Erro ao carregar recursos', error: error });
     }
 });
 
-// GET Detalhe do Recurso
-router.get('/resources/:id', async (req, res) => {
-    try {
-        const resourceResponse = await axios.get(`${API_URL}/resources/${req.params.id}`);
-        const postsResponse = await axios.get(`${API_URL}/posts/resource/${req.params.id}`);
-        res.render('resource', { 
-            title: `EduPortal - ${resourceResponse.data.titulo}`, 
-            resource: resourceResponse.data,
-            posts: postsResponse.data
-        });
-    } catch (error) {
-        res.render('error', { message: 'Erro ao carregar detalhes do recurso', error: error });
-    }
-});
-
-// GET Download (DIP)
+// GET Download (DIP) - Must come before /:id route
 router.get('/resources/download/:id', async (req, res) => {
     try {
         const response = await axios({
@@ -117,6 +118,37 @@ router.get('/resources/download/:id', async (req, res) => {
         response.data.pipe(res);
     } catch (error) {
         res.render('error', { message: 'Erro ao descarregar recurso', error: error });
+    }
+});
+
+// GET Detalhe do Recurso
+router.get('/resources/:id', async (req, res) => {
+    try {
+        const resourceResponse = await axios.get(`${API_URL}/resources/${req.params.id}`);
+        const postsResponse = await axios.get(`${API_URL}/posts/resource/${req.params.id}`);
+        
+        // Calcular média de ratings
+        let totalStars = 0;
+        let countRatings = 0;
+        postsResponse.data.forEach(p => {
+            if (p.ratings) {
+                p.ratings.forEach(r => {
+                    totalStars += r.estrelas;
+                    countRatings++;
+                });
+            }
+        });
+        const average = countRatings > 0 ? (totalStars / countRatings).toFixed(1) : "0.0";
+
+        res.render('resource', { 
+            title: `EduPortal - ${resourceResponse.data.titulo}`, 
+            resource: resourceResponse.data,
+            posts: postsResponse.data,
+            ratingAverage: average,
+            ratingCount: countRatings
+        });
+    } catch (error) {
+        res.render('error', { message: 'Erro ao carregar detalhes do recurso', error: error });
     }
 });
 
@@ -240,8 +272,16 @@ router.get('/login', (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const response = await axios.post(`${API_URL}/users/login`, req.body);
-        res.cookie('token', response.data.token);
-        res.cookie('user', JSON.stringify(response.data.user));
+        
+        // Configurar cookies com segurança
+        const cookieOptions = {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: process.env.COOKIE_SECURE === 'true'
+        };
+
+        res.cookie('token', response.data.token, cookieOptions);
+        res.cookie('user', JSON.stringify(response.data.user), cookieOptions);
         res.redirect('/');
     } catch (error) {
         let msg = "Credenciais inválidas. Por favor, tente novamente.";
@@ -287,6 +327,11 @@ router.get('/logout', (req, res) => {
     res.clearCookie('token');
     res.clearCookie('user');
     res.redirect('/');
+});
+
+// GET Ajuda
+router.get('/help', (req, res) => {
+    res.render('help', { title: 'EduPortal - Ajuda' });
 });
 
 module.exports = router;

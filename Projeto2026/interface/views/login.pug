@@ -1,25 +1,40 @@
 extends layout
 
 block content
-  .w3-card-4.w3-margin.w3-display-middle(style="width:40%; min-width:300px;")
-    .w3-container.w3-teal
-      h2 Login
-    
-    if error
-      .w3-container.w3-red.w3-margin.w3-padding
-        p= error
+  div(class="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-50 py-12 px-4")
+    div(class="w-full max-w-md")
+      div(class="text-center mb-8")
+        div(class="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-4 shadow-lg shadow-primary/20")
+          i(data-lucide="book-open" class="text-white w-10 h-10")
+        h1(class="text-3xl font-extrabold text-edu-dark") Bem-vindo de volta
+        p(class="text-edu-muted mt-2") Entre para aceder aos seus recursos
 
-    form.w3-container.w3-padding-16(action="/login" method="POST")
-      label.w3-text-teal
-        b Email / ID
-      input.w3-input.w3-border.w3-light-grey(type="text" name="_id" required)
-      
-      label.w3-text-teal
-        b Password
-      input.w3-input.w3-border.w3-light-grey(type="password" name="password" required)
-      
-      button.w3-btn.w3-teal.w3-margin-top.w3-block(type="submit") Entrar
-    
-    .w3-container.w3-border-top.w3-padding-16.w3-light-grey.w3-center
-      p Ainda não tens conta? 
-        a(href="/register") Regista-te aqui
+      div(class="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden")
+        div(class="p-8")
+          if error
+            div(class="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm flex items-center gap-2")
+              i(data-lucide="alert-circle" class="w-4 h-4")
+              = error
+
+          form(class="space-y-5" action="/login" method="POST")
+            div(class="space-y-2")
+              label(class="text-sm font-bold text-gray-700" for="_id") Email / ID
+              div(class="relative")
+                i(data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400")
+                input#_id(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" name="_id" placeholder="seu.email@dominio.pt" required)
+            
+            div(class="space-y-2")
+              div(class="flex items-center justify-between")
+                label(class="text-sm font-bold text-gray-700" for="password") Password
+                a(href="#" class="text-xs text-primary hover:underline") Esqueceu-se?
+              div(class="relative")
+                i(data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400")
+                input#password(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="password" name="password" placeholder="••••••••" required)
+            
+            button(class="w-full py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 mt-4" type="submit")
+              | Entrar na Conta
+
+          div(class="mt-8 pt-8 border-t border-gray-50 text-center")
+            p(class="text-sm text-gray-500")
+              | Ainda não tem conta? 
+              a(href="/register" class="text-primary font-bold hover:underline") Registe-se aqui

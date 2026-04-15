@@ -1,44 +1,66 @@
 extends layout
 
 block content
-  .w3-card-4.w3-margin.w3-display-middle(style="width:50%; min-width:350px;")
-    .w3-container.w3-teal
-      h2 Registo de Utilizador
-    
-    if error
-      .w3-container.w3-red.w3-margin.w3-padding
-        p= error
+  div(class="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-50 py-12 px-4")
+    div(class="w-full max-w-xl")
+      div(class="text-center mb-8")
+        div(class="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-4 shadow-lg shadow-primary/20")
+          i(data-lucide="user-plus" class="text-white w-10 h-10")
+        h1(class="text-3xl font-extrabold text-edu-dark") Criar Nova Conta
+        p(class="text-edu-muted mt-2") Junte-se à nossa comunidade educativa
 
-    form.w3-container.w3-padding-16(action="/register" method="POST")
-      label.w3-text-teal
-        b Nome Completo
-      input.w3-input.w3-border.w3-light-grey(type="text" name="nome" required)
+      div(class="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden")
+        div(class="p-8")
+          if error
+            div(class="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm flex items-center gap-2")
+              i(data-lucide="alert-circle" class="w-4 h-4")
+              = error
 
-      label.w3-text-teal
-        b Email (será o seu ID)
-      input.w3-input.w3-border.w3-light-grey(type="email" name="_id" required)
-      
-      label.w3-text-teal
-        b Filiação (ex: Curso, Departamento)
-      input.w3-input.w3-border.w3-light-grey(type="text" name="filiacao")
+          form(class="grid grid-cols-1 md:grid-cols-2 gap-6" action="/register" method="POST")
+            div(class="space-y-2 md:col-span-2")
+              label(class="text-sm font-bold text-gray-700") Nome Completo
+              div(class="relative")
+                i(data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400")
+                input(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" name="nome" placeholder="João Silva" required)
 
-      label.w3-text-teal.w3-margin-top
-        b Nível de Acesso
-      select.w3-select.w3-border(name="nivel" required)
-        option(value="consumidor" selected) Consumidor
-        option(value="produtor") Produtor
-        option(value="admin") Administrador
-      
-      label.w3-text-teal.w3-margin-top
-        b Password
-      input.w3-input.w3-border(type="password" name="password" required)
-      
-      label.w3-text-teal.w3-margin-top
-        b Confirmar Password
-      input.w3-input.w3-border(type="password" name="confirm_password" required)
-      
-      button.w3-btn.w3-teal.w3-margin-top.w3-block(type="submit") Criar Conta
-    
-    .w3-container.w3-border-top.w3-padding-16.w3-light-grey.w3-center
-      p Já tens conta? 
-        a(href="/login") Faz login aqui
+            div(class="space-y-2 md:col-span-2")
+              label(class="text-sm font-bold text-gray-700") Email / ID
+              div(class="relative")
+                i(data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400")
+                input(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="email" name="_id" placeholder="aluno@instituicao.pt" required)
+
+            div(class="space-y-2")
+              label(class="text-sm font-bold text-gray-700") Filiação
+              div(class="relative")
+                i(data-lucide="building" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400")
+                input(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" name="filiacao" placeholder="Departamento X")
+
+            div(class="space-y-2")
+              label(class="text-sm font-bold text-gray-700") Nível
+              div(class="relative")
+                select(class="w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none" name="nivel" required)
+                  option(value="consumidor") Consumidor
+                  option(value="produtor") Produtor
+                  option(value="admin") Administrador
+                i(data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none")
+
+            div(class="space-y-2")
+              label(class="text-sm font-bold text-gray-700") Password
+              div(class="relative")
+                i(data-lucide="key" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400")
+                input(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="password" name="password" placeholder="••••••••" required)
+
+            div(class="space-y-2")
+              label(class="text-sm font-bold text-gray-700") Confirmar Password
+              div(class="relative")
+                i(data-lucide="check-circle" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400")
+                input(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="password" name="confirm_password" placeholder="••••••••" required)
+
+            div(class="md:col-span-2 pt-4")
+              button(class="w-full py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20" type="submit")
+                | Criar Conta Agora
+
+          div(class="mt-8 pt-8 border-t border-gray-50 text-center")
+            p(class="text-sm text-gray-500")
+              | Já tem conta? 
+              a(href="/login" class="text-primary font-bold hover:underline") Faça login aqui

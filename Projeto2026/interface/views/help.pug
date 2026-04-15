@@ -1,0 +1,57 @@
+extends layout
+
+block content
+  div(class="bg-white border-b border-gray-100")
+    div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
+      h1(class="text-3xl font-bold text-edu-dark mb-2") Centro de Ajuda
+      p(class="text-edu-muted") Tudo o que precisas de saber sobre o EduPortal.
+
+  div(class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
+    div(class="space-y-8")
+      // Section 1
+      section(class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm")
+        h2(class="text-xl font-bold text-edu-dark mb-4 flex items-center gap-2")
+          i(data-lucide="shield-check" class="text-primary w-6 h-6")
+          | Níveis de Acesso
+        div(class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6")
+          div(class="p-4 bg-gray-50 rounded-2xl")
+            p(class="font-bold text-sm mb-1") Consumidor
+            p(class="text-xs text-gray-500") Pode explorar e descarregar todos os recursos públicos.
+          div(class="p-4 bg-blue-50 rounded-2xl border border-blue-100")
+            p(class="font-bold text-sm text-primary mb-1") Produtor
+            p(class="text-xs text-gray-600") Pode submeter recursos e gerir o seu próprio material.
+          div(class="p-4 bg-edu-dark rounded-2xl text-white")
+            p(class="font-bold text-sm mb-1") Administrador
+            p(class="text-xs text-blue-200") Gestão total de utilizadores, recursos e exportação de dados.
+
+      // Section 2
+      section(class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm")
+        h2(class="text-xl font-bold text-edu-dark mb-4 flex items-center gap-2")
+          i(data-lucide="package" class="text-primary w-6 h-6")
+          | O que é um pacote SIP?
+        p(class="text-sm text-gray-600 leading-relaxed mb-4")
+          | SIP (Submission Information Package) é o formato padrão para submeter recursos. 
+          | No EduPortal, deves carregar um ficheiro **ZIP** que contenha obrigatoriamente um ficheiro chamado 
+          code(class="bg-gray-100 px-2 py-0.5 rounded font-mono text-primary") manifest.txt
+          |  na raiz.
+        div(class="bg-edu-bg p-4 rounded-xl border border-gray-200 font-mono text-xs text-gray-700")
+          p meu-recurso.zip/
+          p ├── manifest.txt (Lista de ficheiros)
+          p ├── tese-final.pdf
+          p └── anexos/
+          p     └── dados.csv
+
+      // Section 3
+      section(class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm")
+        h2(class="text-xl font-bold text-edu-dark mb-4 flex items-center gap-2")
+          i(data-lucide="download-cloud" class="text-primary w-6 h-6")
+          | Disseminação (DIP)
+        p(class="text-sm text-gray-600 leading-relaxed")
+          | Quando fazes download de um recurso, o sistema gera automaticamente um pacote **DIP** (Dissemination Information Package). 
+          | Este pacote garante a integridade dos dados e inclui toda a metainformação necessária para a preservação digital.
+
+    div(class="mt-12 text-center")
+      p(class="text-gray-500 text-sm mb-4") Ainda tens dúvidas?
+      a(href="mailto:suporte@eduportal.pt" class="inline-flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-all")
+        i(data-lucide="mail" class="w-4 h-4")
+        | Contactar Suporte

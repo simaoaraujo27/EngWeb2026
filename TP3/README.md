@@ -46,7 +46,7 @@ Para correr a aplicação, siga os seguintes passos:
 
     ```bash
     json-server --watch db.json
-
+    
     ```
 
 2.  **Iniciar o Servidor Node.js**: Num terminal separado, navegue até ao diretório `TP3` e inicie o servidor Node.js:

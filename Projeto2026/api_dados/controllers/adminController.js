@@ -1,10 +1,30 @@
-const User = require('../models/user');
-const Resource = require('../models/resource');
+const User = require('./userController');
+const Resource = require('./resourceController');
 const Post = require('../models/post');
 const News = require('../models/news');
+const UserDoc = require('../models/user');
+const ResourceDoc = require('../models/resource');
 const AdmZip = require('adm-zip');
 const path = require('path');
 const fs = require('fs');
+
+module.exports.getStats = async () => {
+    const [userCount, resourceCount, lastMonthCount, allResources] = await Promise.all([
+        UserDoc.countDocuments().exec(),
+        ResourceDoc.countDocuments().exec(),
+        Resource.countLastMonth(),
+        ResourceDoc.find().exec()
+    ]);
+
+    const totalDownloads = allResources.reduce((acc, r) => acc + (r.downloads || 0), 0);
+
+    return {
+        userCount,
+        resourceCount,
+        lastMonthCount,
+        totalDownloads
+    };
+};
 
 module.exports.exportAll = async () => {
     const zip = new AdmZip();

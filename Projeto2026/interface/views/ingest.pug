@@ -1,54 +1,64 @@
 extends layout
 
 block content
-  .w3-card-4.w3-margin
-    .w3-container.w3-teal
-      h2 Ingestão de Recurso (SIP)
-    
-    form.w3-container.w3-padding-16(action="/ingest" method="POST" enctype="multipart/form-data")
-      label.w3-text-teal
-        b Título do Recurso
-      input.w3-input.w3-border.w3-light-grey(type="text" name="titulo" required)
-      
-      label.w3-text-teal
-        b Subtítulo (opcional)
-      input.w3-input.w3-border.w3-light-grey(type="text" name="subtitulo")
-      
-      .w3-row-padding.w3-margin-top
-        .w3-half
-          label.w3-text-teal
-            b Tipo de Recurso
-          select.w3-select.w3-border(name="tipo" required)
-            option(value="" disabled selected) Selecione um tipo
-            option(value="tese") Tese
-            option(value="artigo") Artigo
-            option(value="slides") Slides
-            option(value="relatorio") Relatório
-            option(value="aplicacao") Aplicação
-            option(value="outro") Outro
-        .w3-half
-          label.w3-text-teal
-            b Data de Criação
-          input.w3-input.w3-border(type="date" name="dataCriacao")
+  div(class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
+    div(class="mb-8")
+      h1(class="text-3xl font-extrabold text-edu-dark") Submeter Novo Recurso
+      p(class="text-edu-muted") Partilhe o seu conhecimento através de um pacote SIP (BagIt simplificado).
 
-      label.w3-text-teal.w3-margin-top
-        b Hashtags (separadas por vírgula)
-      input.w3-input.w3-border(type="text" name="hashtags" placeholder="ex: javascript, web, aula")
+    div(class="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden")
+      div(class="p-8")
+        form(class="space-y-8" action="/ingest" method="POST" enctype="multipart/form-data")
+          div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
+            div(class="space-y-2 md:col-span-2")
+              label(class="text-sm font-bold text-gray-700") Título do Recurso
+              input(class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" name="titulo" placeholder="Ex: Manual de Engenharia Web" required)
+            
+            div(class="space-y-2 md:col-span-2")
+              label(class="text-sm font-bold text-gray-700") Subtítulo (opcional)
+              input(class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" name="subtitulo" placeholder="Informação adicional...")
 
-      label.w3-text-teal.w3-margin-top
-        b Visibilidade
-      .w3-row
-        input.w3-radio(type="radio" name="visibilidade" value="público" checked)
-        label.w3-margin-right  Público
-        input.w3-radio(type="radio" name="visibilidade" value="privado")
-        label  Privado
+            div(class="space-y-2")
+              label(class="text-sm font-bold text-gray-700") Tipo de Material
+              div(class="relative")
+                select(class="w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none" name="tipo" required)
+                  option(value="tese") 🎓 Tese
+                  option(value="artigo") 📝 Artigo
+                  option(value="slides") 📊 Slides
+                  option(value="relatorio") 📄 Relatório
+                  option(value="aplicacao") 💻 Aplicação
+                i(data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none")
 
-      hr
-      label.w3-text-teal
-        b Pacote SIP (Ficheiro ZIP com Manifesto)
-      input.w3-input.w3-border(type="file" name="zipFile" accept=".zip" required)
-      
-      // Campo temporário para o produtor (enquanto não há login)
-      input(type="hidden" name="produtor" value="admin@eduportal.pt")
+            div(class="space-y-2")
+              label(class="text-sm font-bold text-gray-700") Data de Criação
+              input(class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="date" name="dataCriacao")
 
-      button.w3-btn.w3-teal.w3-margin-top(type="submit") Submeter Recurso
+            div(class="space-y-2 md:col-span-2")
+              label(class="text-sm font-bold text-gray-700") Hashtags (separadas por vírgula)
+              div(class="relative")
+                i(data-lucide="hash" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400")
+                input(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" name="hashtags" placeholder="web, node, javascript")
+
+          div(class="space-y-2")
+            label(class="text-sm font-bold text-gray-700") Visibilidade
+            div(class="flex gap-6 p-4 bg-gray-50 rounded-2xl border border-gray-100")
+              label(class="flex items-center gap-2 cursor-pointer")
+                input(class="w-4 h-4 text-primary" type="radio" name="visibilidade" value="público" checked)
+                span(class="text-sm") Público
+              label(class="flex items-center gap-2 cursor-pointer")
+                input(class="w-4 h-4 text-primary" type="radio" name="visibilidade" value="privado")
+                span(class="text-sm") Privado
+
+          div(class="space-y-4")
+            label(class="text-sm font-bold text-gray-700") Pacote SIP (Ficheiro ZIP)
+            div(class="border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center hover:border-primary hover:bg-blue-50/30 transition-all group")
+              input#zipFile(class="hidden" type="file" name="zipFile" accept=".zip" required)
+              label(class="cursor-pointer" for="zipFile")
+                div(class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform")
+                  i(data-lucide="upload-cloud" class="text-primary w-8 h-8")
+                p(class="text-sm font-bold text-edu-dark") Seleciona o ficheiro ZIP
+                p(class="text-xs text-gray-400 mt-1") O pacote deve conter o ficheiro manifest.txt
+
+          button(class="w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2" type="submit")
+            i(data-lucide="send" class="w-5 h-5")
+            | Iniciar Processo de Ingestão

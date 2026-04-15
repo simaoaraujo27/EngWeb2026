@@ -25,3 +25,8 @@ module.exports.update = (id, u) => {
 module.exports.remove = id => {
     return User.findByIdAndDelete(id).exec();
 };
+
+// Contar utilizadores
+module.exports.count = () => {
+    return User.countDocuments().exec();
+};

@@ -1,34 +1,90 @@
 extends layout
 
 block content
-  .w3-row
-    .w3-col.l8.m12
-      .w3-card-4.w3-margin
-        .w3-container.w3-teal
-          h2 Feed de Notícias
-        .w3-container.w3-white
-          if news.length > 0
-            ul.w3-ul.w3-hoverable
-              each n in news
-                li.w3-padding-16
-                  span.w3-large= n.conteudo
-                  br
-                  span.w3-text-grey= new Date(n.data).toLocaleString()
-          else
-            p.w3-padding-16 Não há notícias de momento.
+  // Hero Section
+  section(class="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16 sm:py-24")
+    div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center")
+      h1(class="text-4xl sm:text-5xl font-bold mb-6 tracking-tight")
+        | Plataforma de Recursos Educativos
+      p(class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto")
+        | Aceda a livros, artigos, aplicações e trabalhos de qualidade para o seu percurso académico.
+      div(class="flex flex-col sm:flex-row gap-4 justify-center")
+        a(href="/resources" class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-white text-primary rounded-xl font-semibold hover:bg-blue-50 transition-all shadow-lg")
+          i(data-lucide="search" class="w-5 h-5")
+          | Explorar Recursos
+        a(href="/ingest" class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-transparent border-2 border-white text-white rounded-xl font-semibold hover:bg-white hover:text-blue-700 transition-all")
+          | Submeter Recurso
+          i(data-lucide="arrow-right" class="w-5 h-5")
 
-    .w3-col.l4.m12
-      .w3-card-4.w3-margin
-        .w3-container.w3-blue-grey
-          h2 Top 3 Downloads
-        .w3-container.w3-white.w3-padding-16
-          if top.length > 0
-            ul.w3-ul.w3-border
-              each r in top
-                li
-                  a(href=`/resources/${r._id}`) 
-                    b= r.titulo
-                  br
-                  span.w3-small.w3-text-grey= r.downloads + ' downloads'
+  // Stats Section
+  section(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10")
+    div(class="grid grid-cols-2 md:grid-cols-4 gap-4")
+      each stat in [{val: stats.resourceCount, lab: 'Recursos', icon: 'book', col: 'text-blue-600'}, {val: stats.totalDownloads, lab: 'Downloads', icon: 'download', col: 'text-green-600'}, {val: stats.userCount, lab: 'Utilizadores', icon: 'users', col: 'text-purple-600'}, {val: '+'+stats.lastMonthCount, lab: 'Este Mês', icon: 'trending-up', col: 'text-orange-600'}]
+        div(class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between")
+          div
+            p(class="text-xs font-medium text-gray-500 uppercase tracking-wider")= stat.lab
+            p(class="text-2xl font-bold text-gray-900")= stat.val
+          i(data-lucide=stat.icon class=`w-8 h-8 ${stat.col} opacity-20`)
+
+  // Main Content
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16")
+    div(class="grid grid-cols-1 lg:grid-cols-3 gap-12")
+      // Left Column: News
+      div(class="lg:col-span-2")
+        div(class="flex items-center gap-3 mb-8")
+          div(class="p-2 bg-blue-100 rounded-lg")
+            i(data-lucide="rss" class="text-primary w-6 h-6")
+          h2(class="text-2xl font-bold text-gray-900") Feed de Notícias
+        
+        div(class="space-y-4")
+          if news.length > 0
+            each n in news
+              div(class="bg-white p-6 rounded-2xl border border-gray-100 hover:border-primary transition-all group")
+                div(class="flex gap-4")
+                  div(class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-2xl")
+                    if n.tipo == 'submissao'
+                      | 📥
+                    else if n.tipo == 'utilizador'
+                      | 👤
+                    else if n.tipo == 'ranking'
+                      | 🏆
+                    else
+                      | 📢
+                  div(class="flex-1")
+                    div(class="flex items-center justify-between mb-1")
+                      span(class="text-xs font-bold uppercase tracking-widest text-primary")= n.tipo
+                      span(class="text-xs text-gray-400")= new Date(n.data).toLocaleDateString()
+                    p(class="text-gray-800 font-medium text-lg group-hover:text-primary transition-colors")= n.conteudo
           else
-            p Ainda não há downloads.
+            div(class="text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed")
+              p(class="text-gray-500") Não existem notícias de momento.
+
+      // Right Column: Top Downloads
+      div(class="space-y-8")
+        div
+          div(class="flex items-center gap-3 mb-6")
+            i(data-lucide="award" class="text-orange-500 w-6 h-6")
+            h2(class="text-xl font-bold text-gray-900") Top 3 Downloads
+          
+          div(class="space-y-3")
+            if top && top.length > 0
+              each r, index in top
+                a(href=`/resources/${r._id}` class="block bg-white p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all")
+                  div(class="flex items-center gap-4")
+                    div(class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold")
+                      = index + 1
+                    div(class="flex-1 min-w-0")
+                      p(class="font-semibold text-gray-900 truncate")= r.titulo
+                      p(class="text-xs text-gray-500")= r.downloads + ' downloads'
+            else
+              p(class="text-sm text-gray-500 italic") Ainda não há estatísticas.
+
+        // Quick Links / CTA
+        div(class="bg-edu-dark text-white p-8 rounded-3xl relative overflow-hidden")
+          div(class="relative z-10")
+            h3(class="text-xl font-bold mb-2") Precisas de ajuda?
+            p(class="text-blue-200 text-sm mb-6") Consulta o nosso guia de utilizador ou contacta o suporte.
+            a(href="/help" class="text-sm font-bold flex items-center gap-2 hover:gap-3 transition-all")
+              | Saber mais
+              i(data-lucide="chevron-right" class="w-4 h-4")
+          div(class="absolute -right-10 -bottom-10 w-40 h-40 bg-primary rounded-full opacity-20")

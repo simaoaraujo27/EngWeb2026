@@ -1,0 +1,285 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                    ✅ CONFIGURAÇÃO DOCKER COMPLETADA                          ║
+║                      Com Gerenciamento Seguro de Secrets                       ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+📊 RESUMO DAS MUDANÇAS
+═══════════════════════════════════════════════════════════════════════════════════
+
+  ✨ Ficheiros Novos Criados:
+  ├─ .env.docker              - Variáveis para desenvolvimento
+  ├─ .env.docker.interface    - Variáveis da interface
+  ├─ .env.docker.production   - Template para produção ⚠️  NÃO COMMITAR
+  ├─ docker-compose.prod.yml  - Compose para produção
+  ├─ generate-secrets.sh      - Script para gerar secrets
+  ├─ Makefile                 - Comandos Docker simplificados
+  ├─ DOCKER_GUIDE.md          - Documentação completa Docker
+  ├─ api_dados/.dockerignore  - Ignore list para build
+  └─ interface/.dockerignore  - Ignore list para build
+
+  ✏️  Ficheiros Modificados:
+  ├─ docker-compose.yml       - Adicionadas variáveis, health checks
+  ├─ api_dados/Dockerfile     - Melhorias de segurança
+  ├─ interface/Dockerfile     - Melhorias de segurança
+  └─ .gitignore               - Adicionados secrets e .env patterns
+
+
+🔐 SECRETS E VARIÁVEIS DE AMBIENTE
+═══════════════════════════════════════════════════════════════════════════════════
+
+  ✅ .env.docker (Desenvolvimento)
+  ├─ JWT_SECRET → Aleatório por sessão
+  ├─ MONGODB_URI → mongodb://mongodb:27017/projetoEW
+  ├─ PORT → 16000
+  ├─ ALLOWED_ORIGINS → http://localhost:16001,http://interface:16001
+  ├─ MAX_FILE_SIZE → 500MB
+  ├─ NODE_ENV → development
+  └─ COOKIE_SECURE → false
+
+  ⚠️  .env.docker.production (Produção - EDITAR ANTES DE USAR)
+  ├─ JWT_SECRET → MUDAR PARA VALOR SEGURO
+  ├─ MONGODB_URI → mongodb://mongodb:27017/projetoEW
+  ├─ ALLOWED_ORIGINS → Configurar com domínios reais
+  ├─ NODE_ENV → production
+  ├─ COOKIE_SECURE → true
+  └─ MONGO USERNAME/PASSWORD → Adicionar se usar autenticação
+
+  📄 .env.docker.interface (Interface - Desenvolvimento)
+  ├─ PORT → 16001
+  ├─ API_URL → http://api_dados:16000
+  ├─ COOKIE_SECURE → false
+  └─ NODE_ENV → development
+
+
+🚀 COMO USAR
+═══════════════════════════════════════════════════════════════════════════════════
+
+  OPÇÃO 1: Usando Makefile (Recomendado)
+  ────────────────────────────────────────
+
+  make up                 # Iniciar desenvolvimento
+  make logs              # Ver logs
+  make restart           # Reiniciar
+  make down              # Parar
+  make secrets           # Gerar novos secrets
+  make help              # Ver todos os comandos
+
+
+  OPÇÃO 2: Usando Docker Compose Diretamente
+  ────────────────────────────────────────────
+
+  Desenvolvimento:
+  $ docker-compose up -d
+  $ docker-compose logs -f
+  $ docker-compose down
+
+  Produção:
+  $ docker-compose -f docker-compose.prod.yml up -d
+  $ docker-compose -f docker-compose.prod.yml logs -f
+  $ docker-compose -f docker-compose.prod.yml down
+
+
+  OPÇÃO 3: Gerar Novos Secrets
+  ────────────────────────────
+
+  $ bash generate-secrets.sh
+  
+  Isto cria arquivo temporário com values aleatórios:
+  - JWT_SECRET (32 bytes)
+  - MONGO_PASSWORD (24 bytes)
+
+  Copie para .env.docker.production
+
+
+🛡️ MELHORIAS DE SEGURANÇA IMPLEMENTADAS
+═══════════════════════════════════════════════════════════════════════════════════
+
+  ✅ Dockerfile - API & Interface
+  ├─ Usuário não-root (nodejs:nodejs 1001:1001)
+  ├─ Process manager (dumb-init)
+  ├─ Health checks
+  ├─ npm ci em vez de npm install
+  ├─ Cache cleaning
+  ├─ Permissões de ficheiros apropriadas
+  └─ Alpine Linux (imagem minimal)
+
+  ✅ docker-compose.yml
+  ├─ Nomes de containers definidos
+  ├─ Restart policy (unless-stopped)
+  ├─ Health checks com retries
+  ├─ Service dependencies
+  ├─ Volumes nomeados
+  ├─ Network isolada (bridge)
+  └─ Logging configurado
+
+  ✅ Secrets Management
+  ├─ Secrets em .env.docker (não commitados)
+  ├─ Geração aleatória com openssl
+  ├─ Valores únicos por deployment
+  ├─ Logging de acesso controlado
+  └─ .gitignore robusto
+
+  ✅ Network & Storage
+  ├─ Network bridge isolada
+  ├─ Volumes nomeados para persistência
+  ├─ Permissões restricitivas em uploads
+  ├─ Data isolation em MongoDB
+  └─ Cleanup automático
+
+
+📋 CHECKLIST DE SETUP
+═══════════════════════════════════════════════════════════════════════════════════
+
+  ✅ Ficheiros criados:
+  [ ] .env.docker - Variáveis de desenvolvimento
+  [ ] .env.docker.interface - Interface env
+  [ ] .env.docker.production - Template de produção
+  [ ] docker-compose.prod.yml - Compose production
+  [ ] generate-secrets.sh - Script de secrets
+  [ ] Makefile - Comandos simplificados
+  [ ] DOCKER_GUIDE.md - Documentação
+  [ ] .dockerignore em ambos os serviços
+
+  ✅ Dockerfiles melhorados:
+  [ ] api_dados/Dockerfile - Security hardened
+  [ ] interface/Dockerfile - Security hardened
+
+  ✅ Segurança:
+  [ ] JWT_SECRET aleatório
+  [ ] .env.docker.production em .gitignore
+  [ ] Usuários não-root
+  [ ] Health checks funcionam
+  [ ] Network isolada
+
+
+🧪 TESTES RÁPIDOS
+═══════════════════════════════════════════════════════════════════════════════════
+
+  1. Iniciar Containers
+     $ make up
+     # ou
+     $ docker-compose up -d
+
+  2. Verificar Status
+     $ make ps
+     # ou
+     $ docker-compose ps
+
+  3. Testar API
+     $ curl http://localhost:16000/health
+     # Resposta: {"status":"OK"}
+
+  4. Testar Interface
+     $ curl http://localhost:16001
+     # Deve retornar HTML
+
+  5. Ver Logs
+     $ make logs
+     # ou
+     $ docker-compose logs -f
+
+  6. Parar Tudo
+     $ make down
+     # ou
+     $ docker-compose down
+
+
+⚡ COMANDOS ÚTEIS (Makefile)
+═══════════════════════════════════════════════════════════════════════════════════
+
+  make up                # Iniciar containers
+  make down              # Parar containers
+  make restart           # Reiniciar
+  make ps                # Ver status
+  make logs              # Ver logs
+  make build             # Rebuild imagens
+  make rebuild           # Clean rebuild
+  make clean             # Remove containers + volumes
+  make clean-all         # Remove tudo (containers, volumes, images)
+  make secrets           # Gerar novos secrets
+  make shell-api         # Shell no container API
+  make shell-interface   # Shell no container Interface
+  make shell-mongo       # Shell no MongoDB
+  make prod-up           # Iniciar produção
+  make prod-down         # Parar produção
+  make prod-logs         # Logs de produção
+
+
+📚 DOCUMENTAÇÃO
+═══════════════════════════════════════════════════════════════════════════════════
+
+  DOCKER_GUIDE.md
+  ├─ Quick start completo
+  ├─ Estrutura do projeto
+  ├─ Gerenciamento de secrets
+  ├─ Variáveis de ambiente
+  ├─ Security best practices
+  ├─ Troubleshooting
+  └─ Deployment checklist
+
+
+🔐 PRODUÇÃO - PASSOS IMPORTANTES
+═══════════════════════════════════════════════════════════════════════════════════
+
+  1. GERAR SECRETS
+     $ bash generate-secrets.sh
+     
+  2. EDITAR .env.docker.production
+     - JWT_SECRET com valor do passo 1
+     - MONGO_PASSWORD com valor do passo 1
+     - ALLOWED_ORIGINS com domínios reais
+     - COOKIE_SECURE=true
+     
+  3. NUNCA COMMITAR
+     - .env.docker.production
+     - .env.docker.secrets
+     - Qualquer arquivo com secrets
+     
+  4. USAR GERENCIADOR DE SECRETS
+     - Docker Secrets (Swarm)
+     - Kubernetes Secrets
+     - HashiCorp Vault
+     - AWS Secrets Manager
+     
+  5. BACKUP STRATEGY
+     - MongoDB data volumes
+     - Ficheiros de uploads
+     - Configurações
+
+
+✨ FLUXO DE TRABALHO RECOMENDADO
+═══════════════════════════════════════════════════════════════════════════════════
+
+  Desenvolvimento Local:
+  ┌─ make up
+  ├─ Fazer alterações no código
+  ├─ make rebuild (se package.json mudou)
+  ├─ make logs (verificar erros)
+  └─ make down (ao terminar)
+
+  Produção:
+  ┌─ bash generate-secrets.sh
+  ├─ Editar .env.docker.production
+  ├─ docker-compose -f docker-compose.prod.yml up -d
+  ├─ Verificar health checks
+  ├─ Configurar backups e logs
+  └─ Monitorar com docker-compose logs
+
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ TUDO PRONTO PARA USAR COM DOCKER!
+
+  • Secrets gerenciados de forma segura
+  • Dockerfiles otimizados para segurança
+  • Docker Compose completo (dev + prod)
+  • Makefile para simplicidade
+  • Documentação completa
+
+Comece com: make up
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+Data: 15 de Abril de 2026
+Status: ✅ COMPLETO

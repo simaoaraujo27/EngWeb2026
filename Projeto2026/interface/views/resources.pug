@@ -1,39 +1,70 @@
 extends layout
 
 block content
-  .w3-card-4.w3-margin
-    .w3-container.w3-teal
-      h2 Recursos Educativos Disponíveis
-    
-    .w3-container.w3-padding-16
-      // Filtros Rápidos
-      .w3-bar.w3-light-grey.w3-border.w3-margin-bottom
-        a.w3-bar-item.w3-button(href='/resources') Todos
-        a.w3-bar-item.w3-button(href='/resources?tipo=tese') Teses
-        a.w3-bar-item.w3-button(href='/resources?tipo=artigo') Artigos
-        a.w3-bar-item.w3-button(href='/resources?tipo=slides') Slides
-        a.w3-bar-item.w3-button(href='/resources?tipo=aplicacao') Aplicações
+  div(class="bg-white border-b border-gray-100")
+    div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
+      h1(class="text-3xl font-bold text-edu-dark mb-2") Explorar Recursos
+      p(class="text-edu-muted") #{resources.length} recursos disponíveis para consulta.
 
-      if resources.length > 0
-        table.w3-table-all.w3-hoverable
-          thead
-            tr.w3-blue-grey
-              th Título
-              th Tipo
-              th Autor/Produtor
-              th Data Registo
-              th Ações
-          tbody
-            each r in resources
-              tr
-                td= r.titulo
-                td
-                  span.w3-tag.w3-teal.w3-round= r.tipo
-                td= r.produtor
-                td= new Date(r.dataRegisto).toLocaleDateString()
-                td
-                  a.w3-button.w3-small.w3-blue(href=`/resources/${r._id}`) 
-                    i.fa.fa-eye  Ver Detalhes
-      else
-        .w3-panel.w3-pale-blue.w3-leftbar.w3-border-blue
-          p Não foram encontrados recursos.
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
+    // Filters and Search
+    div(class="mb-12 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between")
+      div(class="flex flex-wrap gap-2")
+        each type in [{v: '', l: 'Todos'}, {v: 'tese', l: 'Teses'}, {v: 'artigo', l: 'Artigos'}, {v: 'slides', l: 'Slides'}, {v: 'aplicacao', l: 'Aplicações'}]
+          a(href=type.v ? `/resources?tipo=${type.v}` : '/resources'
+            class=(!type.v && !queryTipo) || (queryTipo == type.v) ? 'px-4 py-2 rounded-full text-sm font-medium transition-all bg-primary text-white shadow-md' : 'px-4 py-2 rounded-full text-sm font-medium transition-all bg-white text-gray-600 border border-gray-200 hover:border-primary'
+          )= type.l
+      
+      div(class="relative w-full md:w-80")
+        i(data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4")
+        input(class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" placeholder="Pesquisar recursos...")
+
+    // Resources Grid
+    if resources.length > 0
+      div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8")
+        each r in resources
+          div(class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all flex flex-col group")
+            div(class="p-6 flex-grow")
+              div(class="flex items-start justify-between mb-4")
+                div(class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform")
+                  if r.tipo == 'slides'
+                    | 📊
+                  else if r.tipo == 'tese'
+                    | 🎓
+                  else if r.tipo == 'artigo'
+                    | 📝
+                  else if r.tipo == 'aplicacao'
+                    | 💻
+                  else
+                    | 📄
+                span(class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gray-100 text-gray-500")= r.tipo
+              
+              a(href=`/resources/${r._id}`)
+                h3(class="text-lg font-bold text-edu-dark mb-2 group-hover:text-primary transition-colors line-clamp-2")= r.titulo
+              if r.subtitulo
+                p(class="text-sm text-edu-muted mb-4 line-clamp-1")= r.subtitulo
+              
+              div(class="flex flex-wrap gap-2 mb-6")
+                each tag in r.hashtags.slice(0, 3)
+                  span(class="text-xs font-medium text-primary bg-blue-50 px-2 py-1 rounded-md") # #{tag}
+
+            div(class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between")
+              div(class="flex items-center gap-4 text-xs text-gray-500")
+                span(class="flex items-center gap-1")
+                  i(data-lucide="download" class="w-3.5 h-3.5")
+                  = r.downloads
+                span(class="flex items-center gap-1")
+                  i(data-lucide="user" class="w-3.5 h-3.5")
+                  = r.produtor.split('@')[0]
+              
+              a(href=`/resources/${r._id}` class="text-sm font-bold text-primary hover:text-primary-dark flex items-center gap-1")
+                | Ver mais
+                i(data-lucide="chevron-right" class="w-4 h-4")
+    else
+      div(class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200")
+        div(class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6")
+          i(data-lucide="folder-open" class="text-gray-300 w-10 h-10")
+        h3(class="text-xl font-bold text-gray-900") Nenhum recurso encontrado
+        p(class="text-gray-500 mb-8") Tenta ajustar os teus filtros de pesquisa.
+        a(href="/resources" class="inline-flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-all")
+          | Limpar Filtros
