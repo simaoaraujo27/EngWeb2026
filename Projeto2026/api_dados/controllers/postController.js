@@ -21,14 +21,17 @@ module.exports.addComment = (pid, comment) => {
 };
 
 // Adicionar/Atualizar um rating (evitar duplicatas)
-module.exports.addRating = (pid, rating) => {
-    // Verificar se o utilizador já votou
+module.exports.addRating = async (pid, rating) => {
+    // 1. Remover rating anterior do utilizador (se existir)
+    await Post.findByIdAndUpdate(
+        pid,
+        { $pull: { ratings: { userId: rating.userId } } }
+    ).exec();
+
+    // 2. Adicionar novo rating
     return Post.findByIdAndUpdate(
         pid,
-        { 
-            $pull: { ratings: { userId: rating.userId } }, // Remover rating anterior do utilizador
-            $push: { ratings: rating } // Adicionar novo rating
-        },
+        { $push: { ratings: rating } },
         { new: true }
     ).exec();
 };

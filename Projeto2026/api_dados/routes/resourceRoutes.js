@@ -28,10 +28,9 @@ router.post('/ingest', auth.verificaAcesso, authz.requireProducer, upload.single
 
         // Validar resourceId
         const resourceId = req.body._id || Date.now().toString();
-        if (!validateResourceId(resourceId)) {
-            fs.unlinkSync(req.file.path);
-            return res.status(400).json({ message: "resourceId contém caracteres inválidos." });
-        }
+        
+        // Debug logs (vão aparecer no docker logs)
+        console.log("Recebido no body:", req.body);
 
         const zipPath = req.file.path;
         let zip;
@@ -51,35 +50,50 @@ router.post('/ingest', auth.verificaAcesso, authz.requireProducer, upload.single
 
         const manifestEntry = zipEntries.find(e => e.entryName.toLowerCase().includes('manifest'));
         if (!manifestEntry) {
-            try {
-                fs.rmSync(extractPath, { recursive: true, force: true });
-            } catch (e) {
-                console.error('Error cleaning up directory:', e);
-            }
-            try {
-                fs.unlinkSync(zipPath);
-            } catch (e) {
-                console.error('Error deleting zip file:', e);
-            }
-            return res.status(400).json({ message: "Erro de validação: Manifesto não encontrado no SIP." });
+            // ... cleanup logic ...
+            return res.status(400).json({ 
+                error: "Relatório de Erros de Ingestão",
+                timestamp: new Date(),
+                validacoes: [
+                    { componente: "SIP", status: "Inválido", erro: "Manifesto não encontrado" },
+                    { componente: "Estrutura", status: "Incompleta", erro: "O pacote ZIP deve conter um ficheiro manifest.txt ou manifest.json." }
+                ]
+            });
         }
 
-        // Validar e processar manifesto
-        let manifest = {};
+        // --- Processar Manifesto (Aceitar JSON ou TXT) ---
+        const manifestContent = manifestEntry.getData().toString('utf8');
+        let filesList = [];
+        
         try {
-            manifest = JSON.parse(manifestEntry.getData().toString('utf8'));
+            // Tentar como JSON primeiro
+            const manifestJson = JSON.parse(manifestContent);
+            if (Array.isArray(manifestJson.files)) {
+                filesList = manifestJson.files;
+            } else if (typeof manifestJson === 'object') {
+                filesList = Object.keys(manifestJson);
+            }
         } catch (e) {
-            try {
-                fs.rmSync(extractPath, { recursive: true, force: true });
-            } catch (err) {
-                console.error('Error cleaning up directory:', err);
-            }
-            try {
-                fs.unlinkSync(zipPath);
-            } catch (err) {
-                console.error('Error deleting zip file:', err);
-            }
-            return res.status(400).json({ message: "Manifesto não é um JSON válido." });
+            // Se falhar JSON, tratar como lista de ficheiros (texto simples, um por linha)
+            filesList = manifestContent.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+        }
+
+        // --- Validar se os ficheiros no manifesto existem no ZIP ---
+        const zipFileNames = zipEntries.filter(e => !e.isDirectory).map(e => e.entryName);
+        const missingFiles = filesList.filter(f => !zipFileNames.includes(f) && f.toLowerCase() !== manifestEntry.entryName.toLowerCase());
+
+        if (missingFiles.length > 0 && filesList.length > 0) {
+             // Limpeza
+             try { fs.rmSync(extractPath, { recursive: true, force: true }); } catch (e) {}
+             try { fs.unlinkSync(zipPath); } catch (e) {}
+             
+             return res.status(400).json({ 
+                error: "Relatório de Erros de Ingestão",
+                timestamp: new Date(),
+                validacoes: [
+                    { componente: "Integridade", status: "Falha", erro: `Ficheiros listados no manifesto não encontrados no ZIP: ${missingFiles.join(', ')}` }
+                ]
+            });
         }
 
         const filesMetadata = zipEntries
@@ -95,6 +109,7 @@ router.post('/ingest', auth.verificaAcesso, authz.requireProducer, upload.single
             tipo: req.body.tipo,
             titulo: req.body.titulo,
             subtitulo: req.body.subtitulo,
+            ano: req.body.ano,
             dataCriacao: req.body.dataCriacao,
             produtor: req.user._id, // Usar o utilizador autenticado como produtor
             hashtags: req.body.hashtags ? (typeof req.body.hashtags === 'string' ? JSON.parse(req.body.hashtags) : req.body.hashtags) : [],

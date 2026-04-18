@@ -5,6 +5,7 @@ const resourceSchema = new mongoose.Schema({
     tipo: { type: String, required: true }, // tese, artigo, slides, etc.
     titulo: { type: String, required: true },
     subtitulo: String,
+    ano: String, // Ano de criação/publicação
     dataCriacao: Date,
     dataRegisto: { type: Date, default: Date.now },
     visibilidade: { 

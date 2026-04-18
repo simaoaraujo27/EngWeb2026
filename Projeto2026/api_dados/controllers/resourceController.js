@@ -26,6 +26,11 @@ module.exports.remove = id => {
     return Resource.findByIdAndDelete(id).exec();
 };
 
+// Remover todos os recursos de um produtor
+module.exports.removeByProducer = produtorId => {
+    return Resource.deleteMany({ produtor: produtorId }).exec();
+};
+
 // Listar por tipo
 module.exports.listByType = t => {
     return Resource.find({ tipo: t }).exec();

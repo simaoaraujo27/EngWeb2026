@@ -14,8 +14,16 @@ router.get('/', (req, res) => {
         });
 });
 
-// Inserir uma notícia (Apenas Admin)
-router.post('/', auth.verificaAcesso, authz.requireAdmin, (req, res) => {
+// Inserir uma notícia
+router.post('/', (req, res, next) => {
+    // Se for uma notícia manual, exige admin. Se for do sistema, permite.
+    if (req.body.tipo === 'manual') {
+        return auth.verificaAcesso(req, res, () => {
+            authz.requireAdmin(req, res, next);
+        });
+    }
+    next();
+}, (req, res) => {
     if (!req.body.conteudo || !req.body.tipo) {
         return res.status(400).json({ message: "Campos obrigatórios faltando: conteudo, tipo" });
     }

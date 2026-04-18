@@ -4,6 +4,8 @@ const userSchema = new mongoose.Schema({
     _id: { type: String, required: true }, // Email ou Username como ID
     nome: { type: String, required: true },
     filiacao: String,
+    curso: String,
+    departamento: String,
     nivel: { 
         type: String, 
         enum: ['admin', 'produtor', 'consumidor'], 

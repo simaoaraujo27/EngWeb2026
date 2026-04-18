@@ -7,9 +7,17 @@ block content
         h1(class="text-3xl font-extrabold text-edu-dark") Painel de Administração
         p(class="text-edu-muted") Gestão centralizada de utilizadores e recursos do sistema.
       
-      a(href="/admin/export" class="inline-flex items-center gap-2 px-6 py-3 bg-edu-dark text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg")
-        i(data-lucide="archive" class="w-5 h-5")
-        | Exportação Global (Backup)
+      div(class="flex gap-4")
+        button#restore-btn(class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm")
+            i(data-lucide="upload" class="w-5 h-5")
+            | Restaurar Dados (ZIP)
+        a(href="/admin/export" class="inline-flex items-center gap-2 px-6 py-3 bg-edu-dark text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg")
+            i(data-lucide="archive" class="w-5 h-5")
+            | Exportação Global (Backup)
+    
+    // Hidden Restore Form
+    form#restore-form(action="/admin-import" method="POST" enctype="multipart/form-data" class="hidden")
+        input#restore-file(type="file" name="zipFile" accept=".zip" onchange="document.getElementById('restore-form').submit()")
 
     div(class="grid grid-cols-1 xl:grid-cols-2 gap-8")
       // Users Management
@@ -27,6 +35,7 @@ block content
               tr
                 th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 uppercase") Nome
                 th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 uppercase") Nível
+                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 uppercase") Último Acesso
                 th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 uppercase") Ações
             tbody(class="divide-y divide-gray-50")
               each u in users
@@ -37,6 +46,12 @@ block content
                   td(class="px-8 py-4")
                     span(class="px-2 py-1 rounded-md text-[10px] font-bold uppercase " + (u.nivel=='admin' ? 'bg-red-50 text-red-600' : (u.nivel=='produtor' ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-600')))
                       = u.nivel
+                  td(class="px-8 py-4")
+                    p(class="text-xs text-gray-500")
+                      if u.dataUltimoAcesso
+                        = new Date(u.dataUltimoAcesso).toLocaleString('pt-PT')
+                      else
+                        span(class="text-gray-300 italic") Nunca
                   td(class="px-8 py-4 text-right")
                     a(href=`/admin/delete-user/${u._id}` class="p-2 text-gray-400 hover:text-red-600 transition-colors" onclick="return confirm('Eliminar utilizador permanentemente?')")
                       i(data-lucide="trash-2" class="w-4 h-4")
@@ -71,3 +86,14 @@ block content
                         i(data-lucide="eye" class="w-4 h-4")
                       a(href=`/admin/delete-resource/${r._id}` class="p-2 text-gray-400 hover:text-red-600 transition-colors" onclick="return confirm('Eliminar recurso permanentemente?')")
                         i(data-lucide="trash-2" class="w-4 h-4")
+
+    script.
+        document.getElementById('restore-btn').addEventListener('click', () => {
+            document.getElementById('restore-file').click();
+        });
+        
+        document.getElementById('restore-form').addEventListener('submit', () => {
+            document.getElementById('restore-btn').disabled = true;
+            document.getElementById('restore-btn').innerHTML = '<i data-lucide="loader-2" class="animate-spin w-5 h-5"></i> A restaurar...';
+            lucide.createIcons();
+        });

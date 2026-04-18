@@ -17,6 +17,9 @@ router.post('/login', async (req, res) => {
         const isMatch = await bcrypt.compare(req.body.password, user.password);
         if (!isMatch) return res.status(401).json({ message: "Password incorreta." });
 
+        // Atualizar data de último acesso
+        await User.update(user._id, { dataUltimoAcesso: new Date() });
+
         const token = jwt.sign({ _id: user._id, nivel: user.nivel, nome: user.nome }, SECRET, { expiresIn: '1h' });
         
         // Não retornar a password
@@ -121,14 +124,39 @@ router.put('/:id', auth.verificaAcesso, (req, res) => {
         });
 });
 
+const Resource = require('../controllers/resourceController');
+const path = require('path');
+const fs = require('fs');
+
+// ... resto das rotas ...
+
 // Remover um utilizador (Protegido - Admin apenas)
-router.delete('/:id', auth.verificaAcesso, authz.requireAdmin, (req, res) => {
-    User.remove(req.params.id)
-        .then(dados => res.status(200).json({ message: "Utilizador removido com sucesso" }))
-        .catch(erro => {
-            console.error('Delete user error:', erro);
-            res.status(500).json({ message: "Erro na remoção do utilizador" });
-        });
+router.delete('/:id', auth.verificaAcesso, authz.requireAdmin, async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        // 1. Obter lista de recursos do utilizador para apagar pastas físicas
+        const userResources = await Resource.list(); // Obter todos (poderia ser otimizado)
+        const toDelete = userResources.filter(r => r.produtor === userId);
+
+        for (const r of toDelete) {
+            const resourcePath = path.join(__dirname, '../storage/resources/', r._id);
+            if (fs.existsSync(resourcePath)) {
+                fs.rmSync(resourcePath, { recursive: true, force: true });
+            }
+        }
+
+        // 2. Remover recursos da base de dados
+        await Resource.removeByProducer(userId);
+
+        // 3. Remover o utilizador
+        await User.remove(userId);
+
+        res.status(200).json({ message: "Utilizador e os seus recursos removidos com sucesso" });
+    } catch (error) {
+        console.error('Delete user error:', error);
+        res.status(500).json({ message: "Erro na remoção do utilizador e recursos" });
+    }
 });
 
 module.exports = router;

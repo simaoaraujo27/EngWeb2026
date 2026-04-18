@@ -50,7 +50,11 @@ block content
               a(href=`/resources/download/${resource._id}` class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all shadow-md")
                 i(data-lucide="download-cloud" class="w-5 h-5")
                 | Transferir ZIP (DIP)
-              button(class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all")
+              if user && (user._id == resource.produtor || user.nivel == 'admin')
+                a(href=`/resources/edit/${resource._id}` class="inline-flex items-center gap-2 px-6 py-3 bg-orange-50 border border-orange-200 text-orange-600 rounded-xl font-bold hover:bg-orange-100 transition-all")
+                  i(data-lucide="edit-3" class="w-5 h-5")
+                  | Editar Metadados
+              button#share-btn(class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all")
                 i(data-lucide="share-2" class="w-5 h-5")
                 | Partilhar
 
@@ -130,3 +134,59 @@ block content
               textarea(class="w-full p-4 bg-white border border-gray-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" name="conteudo" rows="3" placeholder="Escreve a tua opinião..." required)
               button(class="w-full py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all shadow-sm" type="submit")
                 | Publicar Post
+
+    // Popup Notification (Toast)
+    div#toast-notification(style="position: fixed; bottom: 32px; right: 32px; display: none; align-items: center; gap: 12px; padding: 16px 24px; background: #1e293b; color: white; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); z-index: 9999; border: 1px solid rgba(255,255,255,0.1);")
+      div(style="width: 32px; height: 32px; background: #22c55e; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;")
+        span(style="color: white; font-weight: bold; font-size: 18px;") ✓
+      div
+        p(style="margin: 0; font-size: 14px; font-weight: 700; color: white;") Link Copiado!
+        p(style="margin: 0; font-size: 11px; color: #94a3b8;") Link guardado na área de transferência.
+
+    script.
+      document.addEventListener('DOMContentLoaded', function() {
+        const shareBtn = document.getElementById('share-btn');
+        const toast = document.getElementById('toast-notification');
+
+        if (shareBtn) {
+          shareBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = window.location.href;
+            
+            // Lógica de cópia
+            if (navigator.clipboard && window.isSecureContext) {
+              navigator.clipboard.writeText(url).then(showToast);
+            } else {
+              // Fallback para contextos não seguros ou browsers antigos
+              const textArea = document.createElement("textarea");
+              textArea.value = url;
+              textArea.style.position = "fixed";
+              textArea.style.left = "-999999px";
+              textArea.style.top = "-999999px";
+              document.body.appendChild(textArea);
+              textArea.focus();
+              textArea.select();
+              try {
+                document.execCommand('copy');
+                showToast();
+              } catch (err) {
+                console.error('Erro ao copiar:', err);
+              }
+              document.body.removeChild(textArea);
+            }
+          });
+        }
+
+        function showToast() {
+          if (!toast) return;
+          toast.style.display = 'flex';
+          toast.style.opacity = '1';
+          
+          setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => {
+              toast.style.display = 'none';
+            }, 500);
+          }, 3000);
+        }
+      });

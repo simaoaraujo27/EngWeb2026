@@ -29,19 +29,30 @@ block content
                 i(data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400")
                 input(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="email" name="_id" placeholder="aluno@instituicao.pt" required)
 
-            div(class="space-y-2")
-              label(class="text-sm font-bold text-gray-700") Filiação
+            div(class="space-y-2 md:col-span-2")
+              label(class="text-sm font-bold text-gray-700") Instituição / Filiação
               div(class="relative")
                 i(data-lucide="building" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400")
-                input(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" name="filiacao" placeholder="Departamento X")
+                input(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" name="filiacao" placeholder="Universidade do Minho")
 
             div(class="space-y-2")
-              label(class="text-sm font-bold text-gray-700") Nível
+              label(class="text-sm font-bold text-gray-700") Departamento
+              div(class="relative")
+                i(data-lucide="building-2" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400")
+                input(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" name="departamento" placeholder="Departamento de Informática")
+
+            div(class="space-y-2")
+              label(class="text-sm font-bold text-gray-700") Curso
+              div(class="relative")
+                i(data-lucide="graduation-cap" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400")
+                input(class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" type="text" name="curso" placeholder="Engenharia Web")
+
+            div(class="space-y-2 md:col-span-2")
+              label(class="text-sm font-bold text-gray-700") Nível de Acesso
               div(class="relative")
                 select(class="w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none" name="nivel" required)
-                  option(value="consumidor") Consumidor
-                  option(value="produtor") Produtor
-                  option(value="admin") Administrador
+                  option(value="consumidor") 👤 Consumidor (Explorar e Descarregar)
+                  option(value="produtor") 🎓 Produtor (Submeter Recursos)
                 i(data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none")
 
             div(class="space-y-2")
