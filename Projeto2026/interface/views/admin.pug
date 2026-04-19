@@ -4,14 +4,14 @@ block content
   div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
     div(class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12")
       div
-        h1(class="text-3xl font-extrabold text-edu-dark") Painel de Administração
-        p(class="text-edu-muted") Gestão centralizada de utilizadores e recursos do sistema.
+        h1(class="text-3xl font-extrabold text-edu-dark dark:text-white") Painel de Administração
+        p(class="text-edu-muted dark:text-slate-400") Gestão centralizada de utilizadores e recursos do sistema.
       
       div(class="flex gap-4")
-        button#restore-btn(class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm")
+        button#restore-btn(class="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-300 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-slate-800 transition-all shadow-sm")
             i(data-lucide="upload" class="w-5 h-5")
             | Restaurar Dados (ZIP)
-        a(href="/admin/export" class="inline-flex items-center gap-2 px-6 py-3 bg-edu-dark text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg")
+        a(href="/admin/export" class="inline-flex items-center gap-2 px-6 py-3 bg-edu-dark dark:bg-slate-800 text-white rounded-xl font-bold hover:bg-gray-800 dark:hover:bg-slate-700 transition-all shadow-lg")
             i(data-lucide="archive" class="w-5 h-5")
             | Exportação Global (Backup)
     
@@ -21,70 +21,70 @@ block content
 
     div(class="grid grid-cols-1 xl:grid-cols-2 gap-8")
       // Users Management
-      div(class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden")
-        div(class="p-8 border-b border-gray-50 flex items-center justify-between")
+      div(class="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden")
+        div(class="p-8 border-b border-gray-50 dark:border-slate-800 flex items-center justify-between")
           div(class="flex items-center gap-3")
-            div(class="p-2 bg-purple-100 rounded-lg")
-              i(data-lucide="users" class="text-purple-600 w-5 h-5")
-            h2(class="text-xl font-bold text-edu-dark") Utilizadores
-          span(class="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold")= users.length
+            div(class="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg")
+              i(data-lucide="users" class="text-purple-600 dark:text-purple-400 w-5 h-5")
+            h2(class="text-xl font-bold text-edu-dark dark:text-white") Utilizadores
+          span(class="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 rounded-full text-xs font-bold")= users.length
         
         div(class="overflow-x-auto")
           table(class="w-full")
-            thead(class="bg-gray-50")
+            thead(class="bg-gray-50 dark:bg-slate-800/50")
               tr
-                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 uppercase") Nome
-                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 uppercase") Nível
-                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 uppercase") Último Acesso
-                th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 uppercase") Ações
-            tbody(class="divide-y divide-gray-50")
+                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Nome
+                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Nível
+                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Último Acesso
+                th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Ações
+            tbody(class="divide-y divide-gray-50 dark:divide-slate-800")
               each u in users
-                tr(class="hover:bg-gray-50/50 transition-colors")
+                tr(class="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors")
                   td(class="px-8 py-4")
-                    p(class="text-sm font-bold text-edu-dark")= u.nome
-                    p(class="text-xs text-gray-400")= u._id
+                    p(class="text-sm font-bold text-edu-dark dark:text-white")= u.nome
+                    p(class="text-xs text-gray-400 dark:text-slate-500")= u._id
                   td(class="px-8 py-4")
-                    span(class="px-2 py-1 rounded-md text-[10px] font-bold uppercase " + (u.nivel=='admin' ? 'bg-red-50 text-red-600' : (u.nivel=='produtor' ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-600')))
+                    span(class="px-2 py-1 rounded-md text-[10px] font-bold uppercase " + (u.nivel=='admin' ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' : (u.nivel=='produtor' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400')))
                       = u.nivel
                   td(class="px-8 py-4")
-                    p(class="text-xs text-gray-500")
+                    p(class="text-xs text-gray-500 dark:text-slate-400")
                       if u.dataUltimoAcesso
                         = new Date(u.dataUltimoAcesso).toLocaleString('pt-PT')
                       else
-                        span(class="text-gray-300 italic") Nunca
+                        span(class="text-gray-300 dark:text-slate-600 italic") Nunca
                   td(class="px-8 py-4 text-right")
-                    a(href=`/admin/delete-user/${u._id}` class="p-2 text-gray-400 hover:text-red-600 transition-colors" onclick="return confirm('Eliminar utilizador permanentemente?')")
+                    a(href=`/admin/delete-user/${u._id}` class="p-2 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors" onclick="return confirm('Eliminar utilizador permanentemente?')")
                       i(data-lucide="trash-2" class="w-4 h-4")
 
       // Resources Management
-      div(class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden")
-        div(class="p-8 border-b border-gray-50 flex items-center justify-between")
+      div(class="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden")
+        div(class="p-8 border-b border-gray-50 dark:border-slate-800 flex items-center justify-between")
           div(class="flex items-center gap-3")
-            div(class="p-2 bg-blue-100 rounded-lg")
-              i(data-lucide="package" class="text-blue-600 w-5 h-5")
-            h2(class="text-xl font-bold text-edu-dark") Recursos
-          span(class="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold")= resources.length
+            div(class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg")
+              i(data-lucide="package" class="text-blue-600 dark:text-blue-400 w-5 h-5")
+            h2(class="text-xl font-bold text-edu-dark dark:text-white") Recursos
+          span(class="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 rounded-full text-xs font-bold")= resources.length
         
         div(class="overflow-x-auto")
           table(class="w-full")
-            thead(class="bg-gray-50")
+            thead(class="bg-gray-50 dark:bg-slate-800/50")
               tr
-                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 uppercase") Título
-                th(class="px-8 py-4 text-center text-xs font-bold text-gray-400 uppercase") Downloads
-                th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 uppercase") Ações
-            tbody(class="divide-y divide-gray-50")
+                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Título
+                th(class="px-8 py-4 text-center text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Downloads
+                th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Ações
+            tbody(class="divide-y divide-gray-50 dark:divide-slate-800")
               each r in resources
-                tr(class="hover:bg-gray-50/50 transition-colors")
+                tr(class="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors")
                   td(class="px-8 py-4")
-                    p(class="text-sm font-bold text-edu-dark truncate max-w-[200px]")= r.titulo
-                    p(class="text-[10px] text-gray-400")= r.tipo
+                    p(class="text-sm font-bold text-edu-dark dark:text-white truncate max-w-[200px]")= r.titulo
+                    p(class="text-[10px] text-gray-400 dark:text-slate-500")= r.tipo
                   td(class="px-8 py-4 text-center")
-                    span(class="text-sm font-medium text-gray-600")= r.downloads
+                    span(class="text-sm font-medium text-gray-600 dark:text-slate-400")= r.downloads
                   td(class="px-8 py-4 text-right")
                     div(class="flex justify-end gap-2")
-                      a(href=`/resources/${r._id}` class="p-2 text-gray-400 hover:text-primary transition-colors")
+                      a(href=`/resources/${r._id}` class="p-2 text-gray-400 dark:text-slate-500 hover:text-primary transition-colors")
                         i(data-lucide="eye" class="w-4 h-4")
-                      a(href=`/admin/delete-resource/${r._id}` class="p-2 text-gray-400 hover:text-red-600 transition-colors" onclick="return confirm('Eliminar recurso permanentemente?')")
+                      a(href=`/admin/delete-resource/${r._id}` class="p-2 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors" onclick="return confirm('Eliminar recurso permanentemente?')")
                         i(data-lucide="trash-2" class="w-4 h-4")
 
     script.

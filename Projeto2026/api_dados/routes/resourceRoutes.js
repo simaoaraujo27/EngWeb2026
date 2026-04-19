@@ -190,6 +190,20 @@ router.get('/', (req, res) => {
                 console.error('List by hashtag error:', erro);
                 res.status(500).json({ message: "Erro na listagem de recursos" });
             });
+    } else if (req.query.produtor) {
+        Resource.listByProducer(req.query.produtor)
+            .then(dados => res.status(200).json(dados))
+            .catch(erro => {
+                console.error('List by producer error:', erro);
+                res.status(500).json({ message: "Erro na listagem de recursos" });
+            });
+    } else if (req.query.ano) {
+        Resource.listByYear(req.query.ano)
+            .then(dados => res.status(200).json(dados))
+            .catch(erro => {
+                console.error('List by year error:', erro);
+                res.status(500).json({ message: "Erro na listagem de recursos" });
+            });
     } else if (req.query.top) {
         Resource.top3()
             .then(dados => res.status(200).json(dados))

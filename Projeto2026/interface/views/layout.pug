@@ -7,6 +7,7 @@ html(lang="pt")
     script(src="https://cdn.tailwindcss.com")
     script.
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             colors: {
@@ -28,10 +29,16 @@ html(lang="pt")
     link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
     link(href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet")
     script(src="https://unpkg.com/lucide@latest")
+    script.
+      if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+      } else {
+          document.documentElement.classList.remove('dark');
+      }
   
-  body(class="min-h-screen flex flex-col")
+  body(class="min-h-screen flex flex-col bg-white dark:bg-slate-950 transition-colors duration-300")
     // Header
-    header(class="bg-white border-b border-gray-200 sticky top-0 z-50")
+    header(class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 sticky top-0 z-50 transition-colors")
       div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8")
         div(class="flex items-center justify-between h-16")
           // Logo
@@ -39,31 +46,37 @@ html(lang="pt")
             div(class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center")
               i(data-lucide="book-open" class="text-white w-6 h-6")
             div(class="hidden sm:block")
-              div(class="font-bold text-edu-dark text-lg") EduPortal
-              div(class="text-xs text-edu-muted") Plataforma Educativa
+              div(class="font-bold text-edu-dark dark:text-white text-lg") EduPortal
+              div(class="text-xs text-edu-muted dark:text-slate-400") Plataforma Educativa
           
           // Desktop Nav
           nav(class="hidden md:flex items-center gap-2")
-            a(href="/" class="px-3.py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md transition-colors") Início
-            a(href="/resources" class="px-3.py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md transition-colors") Recursos
+            a(href="/" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary rounded-md transition-colors") Início
+            a(href="/resources" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary rounded-md transition-colors") Recursos
             if user
+              a(href="/profile" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary rounded-md transition-colors") O meu Perfil
               if user.nivel == 'admin'
-                a(href="/admin" class="px-3.py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md transition-colors") Dashboard
+                a(href="/admin" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary rounded-md transition-colors") Dashboard
               if user.nivel == 'produtor' || user.nivel == 'admin'
-                a(href="/ingest" class="px-3.py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md transition-colors") Submeter
+                a(href="/ingest" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary rounded-md transition-colors") Submeter
           
           // User Actions
           div(class="flex items-center gap-3")
+            // Theme Toggle
+            button#theme-toggle(class="p-2.5 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-all")
+                i#theme-toggle-dark-icon(data-lucide="moon" class="hidden w-5 h-5")
+                i#theme-toggle-light-icon(data-lucide="sun" class="hidden w-5 h-5")
+
             if user
-              div(class="hidden sm:flex items-center gap-2 mr-2")
-                div(class="w-8.h-8 bg-edu-bg rounded-full flex items-center justify-center text-primary font-bold text-xs")
+              a(href="/profile" class="hidden sm:flex items-center gap-2 mr-2 group")
+                div(class="w-8 h-8 bg-edu-bg dark:bg-slate-800 rounded-full flex items-center justify-center text-primary font-bold text-xs group-hover:bg-primary group-hover:text-white transition-all")
                   = user.nome.charAt(0)
-                span(class="text-sm font-medium text-gray-700")= user.nome.split(' ')[0]
-              a(href="/logout" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all")
+                span(class="text-sm font-medium text-gray-700 dark:text-slate-300 group-hover:text-primary transition-colors")= user.nome.split(' ')[0]
+              a(href="/logout" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all")
                 i(data-lucide="log-out" class="w-4 h-4")
                 span(class="hidden sm:inline") Sair
             else
-              a(href="/login" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary") Entrar
+              a(href="/login" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 hover:text-primary") Entrar
               a(href="/register" class="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-all shadow-sm") Registar
 
     // Main Content
@@ -71,22 +84,57 @@ html(lang="pt")
       block content
 
     // Footer
-    footer(class="bg-white border-t border-gray-200 mt-16")
+    footer(class="bg-white dark:bg-slate-950 border-t border-gray-200 dark:border-slate-800 mt-16 transition-colors")
       div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
         div(class="grid grid-cols-1 md:grid-cols-3 gap-12")
           div
-            div(class="font-bold text-edu-dark mb-4") EduPortal
-            p(class="text-sm text-edu-muted") Plataforma de gestão e disponibilização de recursos educativos para a comunidade académica.
+            div(class="font-bold text-edu-dark dark:text-white mb-4") EduPortal
+            p(class="text-sm text-edu-muted dark:text-slate-400") Plataforma de gestão e disponibilização de recursos educativos para a comunidade académica.
           div
-            div(class="font-bold text-edu-dark mb-4") Links Úteis
-            div(class="flex flex-col gap-2 text-sm text-edu-muted")
-              a(href="/resources" class="hover:text-primary") Explorar Recursos
-              a(href="/ingest" class="hover:text-primary") Submeter Material
+            div(class="font-bold text-edu-dark dark:text-white mb-4") Links Úteis
+            div(class="flex flex-col gap-2 text-sm text-edu-muted dark:text-slate-400")
+              a(href="/resources" class="hover:text-primary transition-colors") Explorar Recursos
+              a(href="/ingest" class="hover:text-primary transition-colors") Submeter Material
           div
-            div(class="font-bold text-edu-dark mb-4") Contacto
-            p(class="text-sm text-edu-muted") Departamento de Informática<br>Universidade do Minho<br>suporte@eduportal.pt
-        div(class="mt-12 pt-8 border-t border-gray-100 text-center text-xs text-edu-muted")
+            div(class="font-bold text-edu-dark dark:text-white mb-4") Contacto
+            p(class="text-sm text-edu-muted dark:text-slate-400") Departamento de Informática<br>Universidade do Minho<br>suporte@eduportal.pt
+        div(class="mt-12 pt-8 border-t border-gray-100 dark:border-slate-800 text-center text-xs text-edu-muted dark:text-slate-500")
           | &copy; 2026 EduPortal. Todos os direitos reservados. Engenharia Web.
 
     script.
       lucide.createIcons();
+
+      // Theme toggle logic
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+      const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+      if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          themeToggleLightIcon.classList.remove('hidden');
+      } else {
+          themeToggleDarkIcon.classList.remove('hidden');
+      }
+
+      themeToggleBtn.addEventListener('click', function() {
+          themeToggleDarkIcon.classList.toggle('hidden');
+          themeToggleLightIcon.classList.toggle('hidden');
+
+          if (localStorage.getItem('color-theme')) {
+              if (localStorage.getItem('color-theme') === 'light') {
+                  document.documentElement.classList.add('dark');
+                  localStorage.setItem('color-theme', 'dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+                  localStorage.setItem('color-theme', 'light');
+              }
+          } else {
+              if (document.documentElement.classList.contains('dark')) {
+                  document.documentElement.classList.remove('dark');
+                  localStorage.setItem('color-theme', 'light');
+              } else {
+                  document.documentElement.classList.add('dark');
+                  localStorage.setItem('color-theme', 'dark');
+              }
+          }
+          lucide.createIcons();
+      });

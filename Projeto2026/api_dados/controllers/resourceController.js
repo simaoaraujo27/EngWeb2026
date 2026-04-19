@@ -41,6 +41,16 @@ module.exports.listByHashtag = h => {
     return Resource.find({ hashtags: h }).exec();
 };
 
+// Listar por produtor
+module.exports.listByProducer = p => {
+    return Resource.find({ produtor: p }).sort({ dataRegisto: -1 }).exec();
+};
+
+// Listar por ano
+module.exports.listByYear = a => {
+    return Resource.find({ ano: a }).sort({ dataRegisto: -1 }).exec();
+};
+
 // Incrementar contador de downloads
 module.exports.incDownloads = id => {
     return Resource.findByIdAndUpdate(id, { $inc: { downloads: 1 } }, { new: true }).exec();

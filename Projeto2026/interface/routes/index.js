@@ -80,10 +80,11 @@ router.post('/ingest', upload.single('zipFile'), async (req, res) => {
 
         if (req.file) fs.unlinkSync(req.file.path);
         
-        // Notícia automática
+        // Notícia automática com resourceId
         await axios.post(`${API_URL}/news`, { 
             conteudo: `Novo recurso: ${req.body.titulo}`, 
-            tipo: 'submissao' 
+            tipo: 'submissao',
+            resourceId: response.data._id
         });
 
         // Devolver JSON para o fetch do frontend
@@ -112,15 +113,34 @@ router.get('/resources', async (req, res) => {
         let queryParams = '';
         if (req.query.tipo) queryParams = `?tipo=${req.query.tipo}`;
         else if (req.query.hashtag) queryParams = `?hashtag=${req.query.hashtag}`;
+        else if (req.query.ano) queryParams = `?ano=${req.query.ano}`;
         
         const response = await axios.get(`${API_URL}/resources${queryParams}`);
+        
+        // Obter todos os recursos para extrair anos únicos
+        let anos = [];
+        try {
+            const allResources = await axios.get(`${API_URL}/resources`);
+            if (allResources.data && Array.isArray(allResources.data)) {
+                anos = [...new Set(allResources.data.map(r => r.ano))].filter(a => a).sort((a, b) => b - a);
+            }
+        } catch (e) {
+            console.error("Erro ao obter anos para o filtro:", e.message);
+        }
+
         res.render('resources', { 
             title: 'EduPortal - Listagem de Recursos', 
-            resources: response.data,
-            queryTipo: req.query.tipo 
+            resources: response.data || [],
+            queryTipo: req.query.tipo,
+            queryAno: req.query.ano,
+            anos: anos
         });
     } catch (error) {
-        res.render('error', { message: 'Erro ao carregar recursos', error: error });
+        res.status(500).render('error', { 
+            title: 'Erro de Ligação',
+            message: 'Não foi possível carregar os recursos. Verifique se a API está ativa.',
+            error: error 
+        });
     }
 });
 
@@ -277,6 +297,15 @@ router.post('/resources/post/:rid', async (req, res) => {
     } catch (error) { res.render('error', { message: 'Erro ao publicar post', error: error }); }
 });
 
+router.post('/resources/post/:pid/comment', async (req, res) => {
+    if (!req.cookies.token) return res.redirect('/login');
+    try {
+        const resourceId = req.body.resourceId;
+        await axios.post(`${API_URL}/posts/${req.params.pid}/comment`, { conteudo: req.body.conteudo }, { headers: { Authorization: req.cookies.token } });
+        res.redirect(`/resources/${resourceId}`);
+    } catch (error) { res.render('error', { message: 'Erro ao publicar comentário', error: error }); }
+});
+
 router.post('/resources/rating/:rid', async (req, res) => {
     if (!req.cookies.token) return res.redirect('/login');
     try {
@@ -316,6 +345,113 @@ router.post('/register', async (req, res) => {
 
 router.get('/logout', (req, res) => { res.clearCookie('token'); res.clearCookie('user'); res.redirect('/'); });
 router.get('/help', (req, res) => res.render('help', { title: 'EduPortal - Ajuda' }));
+
+// --- Área do Utilizador (Perfil) ---
+
+// GET Perfil do Utilizador
+router.get('/profile', async (req, res) => {
+    if (!req.cookies.token) return res.redirect('/login');
+    
+    try {
+        const user = JSON.parse(req.cookies.user);
+        const [userResponse, resourcesResponse] = await Promise.all([
+            axios.get(`${API_URL}/users/${user._id}`, { headers: { Authorization: req.cookies.token } }),
+            axios.get(`${API_URL}/resources?produtor=${user._id}`)
+        ]);
+
+        res.render('profile', { 
+            title: `EduPortal - Perfil de ${user.nome}`, 
+            user: userResponse.data, 
+            resources: resourcesResponse.data 
+        });
+    } catch (error) {
+        res.render('error', { message: 'Erro ao carregar perfil', error: error });
+    }
+});
+
+// GET Editar Perfil
+router.get('/profile/edit', async (req, res) => {
+    if (!req.cookies.token) return res.redirect('/login');
+    
+    try {
+        const user = JSON.parse(req.cookies.user);
+        const response = await axios.get(`${API_URL}/users/${user._id}`, { headers: { Authorization: req.cookies.token } });
+        res.render('edit_profile', { title: 'EduPortal - Editar Perfil', user: response.data });
+    } catch (error) {
+        res.render('error', { message: 'Erro ao carregar formulário de edição de perfil', error: error });
+    }
+});
+
+// POST Editar Perfil
+router.post('/profile/edit', async (req, res) => {
+    if (!req.cookies.token) return res.redirect('/login');
+    
+    try {
+        const user = JSON.parse(req.cookies.user);
+        const response = await axios.put(`${API_URL}/users/${user._id}`, req.body, { 
+            headers: { Authorization: req.cookies.token } 
+        });
+        
+        // Atualizar cookie com novos dados
+        const updatedUser = response.data;
+        res.cookie('user', JSON.stringify(updatedUser), {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: process.env.COOKIE_SECURE === 'true'
+        });
+
+        res.redirect('/profile');
+    } catch (error) {
+        res.render('error', { message: 'Erro ao atualizar perfil', error: error });
+    }
+});
+
+// --- Edição de Recursos ---
+
+// GET Editar Recurso
+router.get('/resources/edit/:id', async (req, res) => {
+    if (!req.cookies.token) return res.redirect('/login');
+    
+    try {
+        const response = await axios.get(`${API_URL}/resources/${req.params.id}`);
+        const resource = response.data;
+        const user = JSON.parse(req.cookies.user);
+
+        if (resource.produtor !== user._id && user.nivel !== 'admin') {
+            return res.status(403).render('error', { message: 'Acesso Negado: Não pode editar este recurso.' });
+        }
+
+        res.render('edit_resource', { title: `EduPortal - Editar ${resource.titulo}`, resource: resource });
+    } catch (error) {
+        res.render('error', { message: 'Erro ao carregar recurso para edição', error: error });
+    }
+});
+
+// POST Editar Recurso
+router.post('/resources/edit/:id', async (req, res) => {
+    if (!req.cookies.token) return res.redirect('/login');
+    
+    try {
+        if (req.body.hashtags && typeof req.body.hashtags === 'string') {
+            req.body.hashtags = req.body.hashtags.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        }
+
+        await axios.put(`${API_URL}/resources/${req.params.id}`, req.body, { 
+            headers: { Authorization: req.cookies.token } 
+        });
+
+        // Notícia de atualização
+        await axios.post(`${API_URL}/news`, { 
+            conteudo: `Recurso atualizado: ${req.body.titulo}`, 
+            tipo: 'manual',
+            resourceId: req.params.id
+        });
+        
+        res.redirect(`/resources/${req.params.id}`);
+    } catch (error) {
+        res.render('error', { message: 'Erro ao atualizar recurso', error: error });
+    }
+});
 
 router.use((req, res) => { res.status(404).render('error', { title: 'Página Não Encontrada' }); });
 

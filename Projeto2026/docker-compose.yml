@@ -9,7 +9,7 @@ services:
       - ./data/db:/data/db
     networks:
       - projeto_network
-    restart: always
+    restart: "no"
 
   # 2. API de Dados
   api_dados:
@@ -29,7 +29,7 @@ services:
       - /usr/src/app/node_modules
     networks:
       - projeto_network
-    restart: always
+    restart: "no"
 
   # 3. Interface Web
   interface:
@@ -48,7 +48,7 @@ services:
       - /usr/src/app/node_modules
     networks:
       - projeto_network
-    restart: always
+    restart: "no"
 
 networks:
   projeto_network:
