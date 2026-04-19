@@ -2,9 +2,35 @@ const express = require('express');
 const mongoose = require('mongoose');
 const logger = require('morgan');
 const cors = require('cors');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
 
 const app = express();
+
+// Configuração do Swagger
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'EduPortal API',
+            version: '1.0.0',
+            description: 'Documentação detalhada da API de Dados do EduPortal (EngWeb2026)',
+        },
+        servers: [{ url: 'http://localhost:16000', description: 'Servidor Local (Interno ao Docker)' }],
+        components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } } },
+        security: [{ bearerAuth: [] }]
+    },
+    apis: ['./routes/*.js', './models/*.js'],
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs-ui', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/api-docs-json', (req, res) => { 
+    res.setHeader('Content-Type', 'application/json'); 
+    res.send(swaggerSpec); 
+});
+
 const PORT = process.env.PORT || 16000;
 
 // Configurações de segurança
@@ -16,8 +42,8 @@ const corsOptions = {
 };
 
 app.use(logger('dev'));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 app.use(cors(corsOptions));
 
 // Security headers
@@ -30,7 +56,7 @@ app.use((req, res, next) => {
 });
 
 // Ligação ao MongoDB
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/projetoEW";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://mongodb:27017/projetoEW";
 mongoose.connect(MONGODB_URI)
     .then(() => console.log('API de Dados: Ligação ao MongoDB estabelecida.'))
     .catch(err => console.error('Erro na ligação ao MongoDB:', err));
@@ -48,7 +74,9 @@ app.get('/health', (req, res) => {
 });
 
 // Tratamento de erros 404
-app.use((req, res) => {
+app.use((req, res, next) => {
+    // Se for uma das rotas do swagger que já tratamos, não faz nada
+    if (req.path === '/api-docs-json' || req.path === '/api-docs-ui') return next();
     res.status(404).json({ message: 'Endpoint não encontrado' });
 });
 
@@ -63,7 +91,7 @@ app.listen(PORT, () => {
     
     // Configurar tarefas periódicas
     const News = require('./controllers/newsController');
-    // Gerar notícias do Top 3 a cada hora (3600000ms)
+    // Gerar notícias do Top 3 a cada hora
     setInterval(() => {
         News.generateTop3News();
     }, 3600000);

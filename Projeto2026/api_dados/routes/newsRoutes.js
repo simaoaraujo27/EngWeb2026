@@ -4,6 +4,38 @@ const News = require('../controllers/newsController');
 const auth = require('../auth/auth');
 const authz = require('../auth/authorization');
 
+/**
+ * @openapi
+ * tags:
+ *   - name: News
+ *     description: Feed de atividade e anúncios do sistema
+ * 
+ * /news:
+ *   get:
+ *     summary: Lista as notícias mais recentes
+ *     tags: [News]
+ *     responses:
+ *       200:
+ *         description: Lista de notícias (limite 20)
+ *   post:
+ *     summary: Cria uma nova notícia
+ *     tags: [News]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [conteudo, tipo]
+ *             properties:
+ *               conteudo: { type: string, example: "Manutenção agendada" }
+ *               tipo: { type: string, enum: [submissao, utilizador, ranking, manual], example: "manual" }
+ *               resourceId: { type: string, description: "ID opcional do recurso associado" }
+ *     responses:
+ *       201:
+ *         description: Notícia criada
+ */
+
 // Listar notícias (Público)
 router.get('/', (req, res) => {
     News.list()

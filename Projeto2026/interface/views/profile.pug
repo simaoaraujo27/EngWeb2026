@@ -47,11 +47,10 @@ block content
           if resources.length > 0
             div(class="overflow-x-auto")
               table(class="w-full")
-                thead(class="bg-gray-50 dark:bg-slate-800/50")
+                thead(class="bg-gray-50 dark:bg-slate-800")
                   tr
-                    th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Recurso
-                    th(class="px-8 py-4 text-center text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Visibilidade
-                    th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Ações
+                    th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest") Recurso
+                    th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-widest") Ações
                 tbody(class="divide-y divide-gray-50 dark:divide-slate-800")
                   each r in resources
                     tr(class="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors")
@@ -59,14 +58,11 @@ block content
                         a(href=`/resources/${r._id}` class="block group")
                           p(class="text-sm font-bold text-edu-dark dark:text-white group-hover:text-primary transition-colors")= r.titulo
                           p(class="text-[10px] text-gray-400 dark:text-slate-500")= r.tipo + " • " + (r.ano || 'S/ Ano')
-                      td(class="px-8 py-4 text-center")
-                        span(class="px-2 py-1 rounded-md text-[10px] font-bold uppercase " + (r.visibilidade=='público' ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' : 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400'))
-                          = r.visibilidade
                       td(class="px-8 py-4 text-right")
                         div(class="flex justify-end gap-2")
-                          a(href=`/resources/edit/${r._id}` class="p-2 text-gray-400 dark:text-slate-500 hover:text-primary transition-colors")
+                          a(href=`/resources/edit/${r._id}` class="p-2 text-gray-400 hover:text-primary transition-colors")
                             i(data-lucide="settings-2" class="w-4 h-4")
-                          a(href=`/resources/download/${r._id}` class="p-2 text-gray-400 dark:text-slate-500 hover:text-primary transition-colors")
+                          a(href=`/resources/download/${r._id}` class="p-2 text-gray-400 hover:text-primary transition-colors")
                             i(data-lucide="download" class="w-4 h-4")
           else
             div(class="p-12 text-center")

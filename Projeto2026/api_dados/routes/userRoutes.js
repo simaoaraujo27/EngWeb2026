@@ -8,6 +8,63 @@ const SECRET = process.env.JWT_SECRET || 'EngWeb2026-Projeto-Secret';
 const auth = require('../auth/auth');
 const authz = require('../auth/authorization');
 
+/**
+ * @openapi
+ * tags:
+ *   - name: Users
+ *     description: Gestão de utilizadores e perfis
+ *   - name: Auth
+ *     description: Autenticação e tokens JWT
+ * 
+ * /users/login:
+ *   post:
+ *     summary: Autentica um utilizador e devolve um token JWT
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [_id, password]
+ *             properties:
+ *               _id: { type: string, description: "Email/ID do utilizador", example: "admin@test.pt" }
+ *               password: { type: string, description: "Password em texto limpo", example: "password123" }
+ *     responses:
+ *       200:
+ *         description: Login bem-sucedido
+ *       401:
+ *         description: Credenciais inválidas
+ * 
+ * /users:
+ *   get:
+ *     summary: Lista todos os utilizadores (Admin apenas)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de utilizadores devolvida com sucesso
+ *   post:
+ *     summary: Regista um novo utilizador
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [_id, password, nome]
+ *             properties:
+ *               _id: { type: string, example: "novo@user.pt" }
+ *               password: { type: string, example: "password123" }
+ *               nome: { type: string, example: "Novo Utilizador" }
+ *               nivel: { type: string, enum: [admin, produtor, consumidor], example: "consumidor" }
+ *     responses:
+ *       201:
+ *         description: Utilizador criado com sucesso
+ */
+
 // Rota de Login (Público)
 router.post('/login', async (req, res) => {
     try {

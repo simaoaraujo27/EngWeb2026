@@ -7,6 +7,49 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const fs = require('fs');
 
+/**
+ * @openapi
+ * tags:
+ *   - name: Admin
+ *     description: Operações administrativas e preservação de dados
+ * 
+ * /admin/stats:
+ *   get:
+ *     summary: Obtém estatísticas globais do sistema
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: Objeto com contagens de utilizadores, recursos e downloads
+ * 
+ * /admin/export:
+ *   get:
+ *     summary: Exportação global de toda a base de dados (ZIP)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Ficheiro ZIP contendo JSONs de todas as coleções
+ * 
+ * /admin/import:
+ *   post:
+ *     summary: Importação/Restauro global de dados (ZIP)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required: [zipFile]
+ *             properties:
+ *               zipFile: { type: string, format: binary, description: "ZIP de exportação gerado pelo sistema" }
+ *     responses:
+ *       200:
+ *         description: Importação concluída com sucesso
+ */
+
 // Rota de Estatísticas (Público)
 router.get('/stats', async (req, res) => {
     try {

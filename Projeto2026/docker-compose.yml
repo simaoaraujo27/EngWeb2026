@@ -15,8 +15,6 @@ services:
   api_dados:
     build: ./api_dados
     container_name: projeto_api_dados
-    ports:
-      - "16000:16000"
     environment:
       - PORT=16000
       - MONGODB_URI=mongodb://mongodb:27017/projetoEW

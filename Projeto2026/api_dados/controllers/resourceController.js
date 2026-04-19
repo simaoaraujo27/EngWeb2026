@@ -1,8 +1,8 @@
 const Resource = require('../models/resource');
 
-// Listar todos os recursos
-module.exports.list = () => {
-    return Resource.find().sort({ dataRegisto: -1 }).exec();
+// Listar recursos com filtros dinâmicos
+module.exports.list = (filter = {}) => {
+    return Resource.find(filter).sort({ dataRegisto: -1 }).exec();
 };
 
 // Consultar um recurso por ID
@@ -58,7 +58,7 @@ module.exports.incDownloads = id => {
 
 // Obter Top 3 mais descarregados
 module.exports.top3 = () => {
-    return Resource.find({ visibilidade: 'público' }).sort({ downloads: -1 }).limit(3).exec();
+    return Resource.find().sort({ downloads: -1 }).limit(3).exec();
 };
 
 // Contar recursos criados nos últimos 30 dias

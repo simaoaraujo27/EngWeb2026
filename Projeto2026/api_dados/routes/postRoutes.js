@@ -3,6 +3,74 @@ const router = express.Router();
 const Post = require('../controllers/postController');
 const auth = require('../auth/auth');
 
+/**
+ * @openapi
+ * tags:
+ *   - name: Posts
+ *     description: Comentários e avaliações de recursos
+ * 
+ * /posts/resource/{rid}:
+ *   get:
+ *     summary: Lista posts de um recurso
+ *     tags: [Posts]
+ *     parameters:
+ *       - name: rid
+ *         in: path
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Lista de posts
+ * 
+ * /posts/{id}/comment:
+ *   post:
+ *     summary: Adiciona uma resposta a um post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [conteudo]
+ *             properties:
+ *               conteudo: { type: string, example: "Minha resposta" }
+ *     responses:
+ *       200:
+ *         description: Comentário adicionado
+ * 
+ * /posts/{id}/rating:
+ *   post:
+ *     summary: Atribui uma classificação (estrelas) num post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [estrelas]
+ *             properties:
+ *               estrelas: { type: number, minimum: 1, maximum: 5, example: 5 }
+ *     responses:
+ *       200:
+ *         description: Rating adicionado
+ */
+
 // Listar posts de um recurso (Público)
 router.get('/resource/:rid', (req, res) => {
     Post.listByResource(req.params.rid)

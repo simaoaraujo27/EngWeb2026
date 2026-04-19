@@ -8,11 +8,6 @@ const resourceSchema = new mongoose.Schema({
     ano: String, // Ano de criação/publicação
     dataCriacao: Date,
     dataRegisto: { type: Date, default: Date.now },
-    visibilidade: { 
-        type: String, 
-        enum: ['público', 'privado'], 
-        default: 'público' 
-    },
     produtor: { type: String, ref: 'user', required: true },
     hashtags: [String],
     downloads: { type: Number, default: 0 },

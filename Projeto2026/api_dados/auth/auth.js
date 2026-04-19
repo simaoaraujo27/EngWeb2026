@@ -24,3 +24,17 @@ module.exports.verificaAcesso = (req, res, next) => {
         next();
     });
 };
+
+module.exports.autenticacaoOpcional = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+        req.user = null;
+        return next();
+    }
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
+    jwt.verify(token, SECRET, (err, payload) => {
+        if (err) req.user = null;
+        else req.user = payload;
+        next();
+    });
+};
