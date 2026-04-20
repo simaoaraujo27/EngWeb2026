@@ -145,6 +145,16 @@ router.post('/', async (req, res) => {
         
         const dados = await User.insert(req.body);
         
+        // --- GERAR NOTÍCIA AUTOMÁTICA (API side) ---
+        try {
+            await News.insert({
+                conteudo: `Novo utilizador registado: ${req.body.nome} juntou-se à plataforma!`,
+                tipo: 'utilizador'
+            });
+        } catch (newsErr) {
+            console.error('Error generating user news:', newsErr);
+        }
+
         // Remover password da resposta
         const obj = dados.toObject ? dados.toObject() : dados;
         delete obj.password;

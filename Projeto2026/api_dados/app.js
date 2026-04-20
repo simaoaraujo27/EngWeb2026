@@ -17,8 +17,21 @@ const swaggerOptions = {
             version: '1.0.0',
             description: 'Documentação detalhada da API de Dados do EduPortal (EngWeb2026)',
         },
-        servers: [{ url: 'http://localhost:16000', description: 'Servidor Local (Interno ao Docker)' }],
-        components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } } },
+        servers: [
+            { 
+                url: '/api-proxy', 
+                description: 'Gateway da Interface (Proxy)' 
+            }
+        ],
+        components: { 
+            securitySchemes: { 
+                bearerAuth: { 
+                    type: 'http', 
+                    scheme: 'bearer', 
+                    bearerFormat: 'JWT' 
+                } 
+            } 
+        },
         security: [{ bearerAuth: [] }]
     },
     apis: ['./routes/*.js', './models/*.js'],
@@ -75,7 +88,6 @@ app.get('/health', (req, res) => {
 
 // Tratamento de erros 404
 app.use((req, res, next) => {
-    // Se for uma das rotas do swagger que já tratamos, não faz nada
     if (req.path === '/api-docs-json' || req.path === '/api-docs-ui') return next();
     res.status(404).json({ message: 'Endpoint não encontrado' });
 });
@@ -88,10 +100,7 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
     console.log(`API de Dados a correr na porta ${PORT}`);
-    
-    // Configurar tarefas periódicas
     const News = require('./controllers/newsController');
-    // Gerar notícias do Top 3 a cada hora
     setInterval(() => {
         News.generateTop3News();
     }, 3600000);

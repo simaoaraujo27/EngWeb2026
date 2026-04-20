@@ -3,17 +3,11 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const crypto = require('crypto');
 const AdmZip = require('adm-zip');
+const { validateSIP } = require('../utils/bagitValidator');
 
-// Função para calcular MD5 de um ficheiro
-function calculateMD5(filePath) {
-    const fileBuffer = fs.readFileSync(filePath);
-    const hashSum = crypto.createHash('md5');
-    hashSum.update(fileBuffer);
-    return hashSum.digest('hex');
-}
 const Resource = require('../controllers/resourceController');
+const News = require('../controllers/newsController');
 const auth = require('../auth/auth');
 const authz = require('../auth/authorization');
 
@@ -101,115 +95,64 @@ router.post('/ingest', auth.verificaAcesso, authz.requireProducer, upload.single
     try {
         if (!req.file) return res.status(400).json({ message: "Ficheiro ZIP não enviado." });
 
-        // Validar resourceId
         const resourceId = req.body._id || Date.now().toString();
-        
-        // Debug logs (vão aparecer no docker logs)
-        console.log("Recebido no body:", req.body);
-
         const zipPath = req.file.path;
         let zip;
+
+        // Validar e extrair ZIP
         try {
             zip = new AdmZip(zipPath);
         } catch (e) {
             fs.unlinkSync(zipPath);
-            return res.status(400).json({ message: "Ficheiro ZIP inválido ou corrompido." });
+            return res.status(400).json({ 
+                error: "Erro na Ingestão",
+                timestamp: new Date(),
+                mensagem: "Ficheiro ZIP inválido ou corrompido."
+            });
         }
 
         const zipEntries = zip.getEntries();
-        
         const extractPath = path.join(__dirname, '../storage/resources/', resourceId);
         
         if (!fs.existsSync(extractPath)) fs.mkdirSync(extractPath, { recursive: true });
         zip.extractAllTo(extractPath, true);
 
+        // Procurar manifesto
         const manifestEntry = zipEntries.find(e => e.entryName.toLowerCase().includes('manifest'));
         if (!manifestEntry) {
-            // ... cleanup logic ...
+            try { fs.rmSync(extractPath, { recursive: true, force: true }); } catch (e) {}
+            try { fs.unlinkSync(zipPath); } catch (e) {}
+            
             return res.status(400).json({ 
                 error: "Relatório de Erros de Ingestão",
                 timestamp: new Date(),
                 validacoes: [
-                    { componente: "SIP", status: "Inválido", erro: "Manifesto não encontrado" },
-                    { componente: "Estrutura", status: "Incompleta", erro: "O pacote ZIP deve conter um ficheiro manifest.txt ou manifest.json." }
+                    { componente: "Manifesto", status: "Erro Crítico", erro: "Manifesto não encontrado no pacote SIP" }
                 ]
             });
         }
 
-        // --- Processar Manifesto (Aceitar JSON ou TXT) ---
+        // Validação BagIt completa
         const manifestContent = manifestEntry.getData().toString('utf8');
-        let filesWithHashes = {}; // Objeto { filename: hash }
-        
-        try {
-            // Tentar como JSON primeiro
-            const manifestJson = JSON.parse(manifestContent);
-            if (Array.isArray(manifestJson.files)) {
-                manifestJson.files.forEach(f => {
-                    if (typeof f === 'string') filesWithHashes[f] = null;
-                    else if (f.nome) filesWithHashes[f.nome] = f.checksum || null;
-                });
-            } else if (typeof manifestJson === 'object') {
-                filesWithHashes = manifestJson;
-            }
-        } catch (e) {
-            // Se falhar JSON, tratar como texto simples (formato BagIt: "hash filename" ou apenas "filename")
-            const lines = manifestContent.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
-            lines.forEach(line => {
-                const parts = line.split(/\s+/);
-                if (parts.length >= 2) {
-                    // Assume formato "hash filename"
-                    filesWithHashes[parts[1]] = parts[0];
-                } else {
-                    filesWithHashes[line] = null;
-                }
-            });
-        }
+        const validacao = validateSIP(extractPath, manifestContent);
 
-        const filesList = Object.keys(filesWithHashes);
-
-        // --- Validar Checksums e Existência ---
-        const zipFileNames = zipEntries.filter(e => !e.isDirectory).map(e => e.entryName);
-        const reportValidacoes = [];
-        let hasIntegrityError = false;
-
-        for (const filename of filesList) {
-            if (filename.toLowerCase() === manifestEntry.entryName.toLowerCase()) continue;
-
-            if (!zipFileNames.includes(filename)) {
-                reportValidacoes.push({ componente: filename, status: "Em falta", erro: "Ficheiro listado no manifesto não encontrado no ZIP" });
-                hasIntegrityError = true;
-                continue;
-            }
-
-            // Se houver hash no manifesto, validar integridade
-            const providedHash = filesWithHashes[filename];
-            if (providedHash && providedHash.length >= 32) { // MD5 tem 32 chars
-                const actualPath = path.join(extractPath, filename);
-                const calculatedHash = calculateMD5(actualPath);
-                
-                if (calculatedHash !== providedHash.toLowerCase()) {
-                    reportValidacoes.push({ 
-                        componente: filename, 
-                        status: "Corrompido", 
-                        erro: `Checksum mismatch! Esperado: ${providedHash}, Calculado: ${calculatedHash}` 
-                    });
-                    hasIntegrityError = true;
-                }
-            }
-        }
-
-        if (hasIntegrityError) {
-             // Limpeza
-             try { fs.rmSync(extractPath, { recursive: true, force: true }); } catch (e) {}
-             try { fs.unlinkSync(zipPath); } catch (e) {}
-             
-             return res.status(400).json({ 
-                error: "Relatório de Erros de Ingestão",
+        if (!validacao.valid) {
+            // Limpeza em caso de erro
+            try { fs.rmSync(extractPath, { recursive: true, force: true }); } catch (e) {}
+            try { fs.unlinkSync(zipPath); } catch (e) {}
+            
+            return res.status(400).json({ 
+                error: "Relatório de Erros de Ingestão SIP",
                 timestamp: new Date(),
-                validacoes: reportValidacoes
+                resumo: {
+                    erros: validacao.errors.length,
+                    avisos: validacao.warnings.length
+                },
+                validacoes: [...validacao.errors, ...validacao.warnings]
             });
         }
 
+        // Extrair metadados de ficheiros
         const filesMetadata = zipEntries
             .filter(e => !e.isDirectory && !e.entryName.toLowerCase().includes('manifest'))
             .map(e => ({
@@ -218,6 +161,7 @@ router.post('/ingest', auth.verificaAcesso, authz.requireProducer, upload.single
                 path: path.join('resources', resourceId, e.entryName)
             }));
 
+        // Criar recurso no BD
         const resourceData = {
             _id: resourceId,
             tipo: req.body.tipo,
@@ -225,18 +169,40 @@ router.post('/ingest', auth.verificaAcesso, authz.requireProducer, upload.single
             subtitulo: req.body.subtitulo,
             ano: req.body.ano,
             dataCriacao: req.body.dataCriacao,
-            produtor: req.user._id, // Usar o utilizador autenticado como produtor
+            produtor: req.user._id,
             hashtags: req.body.hashtags ? (typeof req.body.hashtags === 'string' ? JSON.parse(req.body.hashtags) : req.body.hashtags) : [],
             files: filesMetadata
         };
 
         const result = await Resource.insert(resourceData);
+        
+        // --- GERAR NOTÍCIA AUTOMÁTICA (API side) ---
+        try {
+            await News.insert({
+                conteudo: `Nova submissão: O produtor ${req.user.nome} disponibilizou um(a) ${req.body.tipo} entitulado(a) "${req.body.titulo}".`,
+                tipo: 'submissao',
+                resourceId: resourceId
+            });
+        } catch (newsErr) {
+            console.error('Error generating submission news:', newsErr);
+        }
+
         try {
             fs.unlinkSync(zipPath);
         } catch (e) {
             console.error('Error deleting zip file:', e);
         }
-        res.status(201).json(result);
+
+        res.status(201).json({
+            message: "Recurso ingerido com sucesso",
+            resourceId: resourceId,
+            validacao: {
+                valid: true,
+                avisos: validacao.warnings.length,
+                detalhes: validacao.warnings
+            },
+            resource: result
+        });
     } catch (error) {
         console.error('Ingest error:', error);
         res.status(500).json({ message: "Falha no processo de ingestão (SIP)." });
@@ -301,6 +267,7 @@ router.get('/download/:id', async (req, res) => {
 
         // Incrementar contador de downloads
         await Resource.incDownloads(resourceId);
+        News.generateTop3News(); // Gatilho assíncrono
 
         const zip = new AdmZip();
         zip.addLocalFolder(resourcePath);

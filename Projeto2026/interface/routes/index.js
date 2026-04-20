@@ -44,10 +44,7 @@ router.get('/', async (req, res) => {
 
 // GET Ingestão
 router.get('/ingest', (req, res) => {
-    // Se não estiver logado, finge que a página não existe
-    if (!req.cookies.token) {
-        return res.status(404).render('error', { title: 'Página Não Encontrada' });
-    }
+    if (!req.cookies.token) return res.status(404).render('error', { title: 'Página Não Encontrada' });
     res.render('ingest', { title: 'EduPortal - Ingestão de Recurso' });
 });
 
@@ -63,7 +60,6 @@ router.post('/ingest', upload.single('zipFile'), async (req, res) => {
         form.append('ano', req.body.ano);
         form.append('tipo', req.body.tipo);
         form.append('dataCriacao', req.body.dataCriacao || '');
-        form.append('visibilidade', req.body.visibilidade);
         form.append('produtor', user._id);
         
         const tags = req.body.hashtags ? req.body.hashtags.split(',').map(s => s.trim()) : [];
@@ -84,13 +80,18 @@ router.post('/ingest', upload.single('zipFile'), async (req, res) => {
 
         if (req.file) fs.unlinkSync(req.file.path);
         
+        // Extrair ID de forma robusta
+        const rid = response.data.resourceId || response.data._id || (response.data.resource && response.data.resource._id);
+        console.log("ID do recurso criado:", rid);
+
+        // Notícia automática
         await axios.post(`${API_URL}/news`, { 
             conteudo: `Novo recurso: ${req.body.titulo}`, 
             tipo: 'submissao',
-            resourceId: response.data._id
-        });
+            resourceId: rid
+        }, { headers: { Authorization: req.cookies.token } });
 
-        res.status(200).json({ _id: response.data._id });
+        res.status(200).json({ _id: rid });
 
     } catch (error) {
         if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
@@ -109,6 +110,7 @@ router.get('/resources', async (req, res) => {
         if (req.query.tipo) queryParams = `?tipo=${req.query.tipo}`;
         else if (req.query.hashtag) queryParams = `?hashtag=${req.query.hashtag}`;
         else if (req.query.ano) queryParams = `?ano=${req.query.ano}`;
+        else if (req.query.produtor) queryParams = `?produtor=${req.query.produtor}`;
         
         const config = req.cookies.token ? { headers: { Authorization: req.cookies.token } } : {};
         const response = await axios.get(`${API_URL}/resources${queryParams}`, config);
@@ -136,12 +138,13 @@ router.get('/resources', async (req, res) => {
 // GET Download (DIP)
 router.get('/resources/download/:id', async (req, res) => {
     try {
-        const response = await axios({
+        const config = {
             url: `${API_URL}/resources/download/${req.params.id}`,
             method: 'GET',
             responseType: 'stream',
             headers: req.cookies.token ? { Authorization: req.cookies.token } : {}
-        });
+        };
+        const response = await axios(config);
         res.set('Content-Type', 'application/zip');
         res.set('Content-Disposition', `attachment; filename="DIP-${req.params.id}.zip"`);
         response.data.pipe(res);
@@ -157,7 +160,7 @@ router.get('/resources/:id/file/:filename', async (req, res) => {
             url: `${API_URL}/resources/${req.params.id}/file/${encodeURIComponent(req.params.filename)}`,
             method: 'GET',
             responseType: 'stream',
-            headers: { Authorization: req.cookies.token }
+            headers: req.cookies.token ? { Authorization: req.cookies.token } : {}
         });
         res.set('Content-Disposition', `attachment; filename="${req.params.filename}"`);
         response.data.pipe(res);
@@ -199,26 +202,20 @@ router.get('/resources/:id', async (req, res) => {
 
 // GET Painel de Administração
 router.get('/admin', async (req, res) => {
-    // Ofuscação de segurança: se não for admin ou não logado, 404
     if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') {
         return res.status(404).render('error', { title: 'Página Não Encontrada' });
     }
-
     try {
         const config = { headers: { Authorization: req.cookies.token } };
         const usersResponse = await axios.get(`${API_URL}/users`, config);
         const resourcesResponse = await axios.get(`${API_URL}/resources`, config);
         res.render('admin', { title: 'EduPortal - Administração', users: usersResponse.data, resources: resourcesResponse.data });
-    } catch (error) {
-        res.status(404).render('error');
-    }
+    } catch (error) { res.status(404).render('error'); }
 });
 
 // GET Eliminar Recurso (Admin)
 router.get('/admin/delete-resource/:id', async (req, res) => {
-    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') {
-        return res.status(404).render('error');
-    }
+    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') return res.status(404).render('error');
     try {
         await axios.delete(`${API_URL}/resources/${req.params.id}`, { headers: { Authorization: req.cookies.token } });
         res.redirect('/admin');
@@ -227,9 +224,7 @@ router.get('/admin/delete-resource/:id', async (req, res) => {
 
 // GET Eliminar Utilizador (Admin)
 router.get('/admin/delete-user/:id', async (req, res) => {
-    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') {
-        return res.status(404).render('error');
-    }
+    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') return res.status(404).render('error');
     try {
         await axios.delete(`${API_URL}/users/${req.params.id}`, { headers: { Authorization: req.cookies.token } });
         res.redirect('/admin');
@@ -238,25 +233,89 @@ router.get('/admin/delete-user/:id', async (req, res) => {
 
 // GET Exportação Global (Admin)
 router.get('/admin/export', async (req, res) => {
-    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') {
-        return res.status(404).render('error');
-    }
+    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') return res.status(404).render('error');
     try {
-        const response = await axios({
-            url: `${API_URL}/admin/export`,
-            method: 'GET',
-            headers: { Authorization: req.cookies.token },
-            responseType: 'stream'
-        });
+        const response = await axios({ url: `${API_URL}/admin/export`, method: 'GET', headers: { Authorization: req.cookies.token }, responseType: 'stream' });
         res.set('Content-Type', 'application/zip');
         res.set('Content-Disposition', 'attachment; filename="EduPortal-Full-Export.zip"');
         response.data.pipe(res);
     } catch (error) { res.status(404).render('error'); }
 });
 
+// POST Importação Global (Admin)
+router.post('/admin-import', upload.single('zipFile'), async (req, res) => {
+    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') return res.status(404).render('error');
+    
+    try {
+        const form = new FormData();
+        form.append('zipFile', fs.createReadStream(req.file.path), {
+            filename: req.file.originalname,
+            contentType: req.file.mimetype
+        });
+
+        await axios.post(`${API_URL}/admin/import`, form, {
+            headers: { 
+                ...form.getHeaders(),
+                Authorization: req.cookies.token 
+            },
+            timeout: 300000 // 5 minutos
+        });
+
+        if (req.file) fs.unlinkSync(req.file.path);
+        res.redirect('/admin?restore=success');
+
+    } catch (error) {
+        if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+        res.render('error', { 
+            title: 'Erro no Restauro', 
+            message: 'Não foi possível importar o pacote de backup.',
+            error: error.response ? error.response.data : error 
+        });
+    }
+});
+
+// Proxy para a API (usado pelo Swagger UI)
+router.use('/api-proxy', async (req, res) => {
+    try {
+        const path = req.url;
+        const config = {
+            method: req.method,
+            url: `${API_URL}${path}`,
+            data: req.body,
+            headers: {
+                Authorization: req.headers.authorization || ''
+            }
+        };
+
+        // Se houver corpo no pedido (POST/PUT), garantir o Content-Type correto
+        if (req.headers['content-type']) {
+            config.headers['Content-Type'] = req.headers['content-type'];
+        }
+
+        const response = await axios(config);
+        res.status(response.status).json(response.data);
+    } catch (error) {
+        const status = error.response ? error.response.status : 500;
+        const data = error.response ? error.response.data : { message: "Erro no Proxy da API", detail: error.message };
+        res.status(status).json(data);
+    }
+});
+
+// Documentação da API
+router.get('/api-docs-json', async (req, res) => {
+    try {
+        const response = await axios.get(`http://api_dados:16000/api-docs-json`);
+        res.json(response.data);
+    } catch (error) { res.status(500).json({ error: "Erro ao obter a especificação da API" }); }
+});
+
+router.get('/api-docs', (req, res) => {
+    res.render('api_docs', { title: 'EduPortal - API Documentation' });
+});
+
 // POST Novo Post
 router.post('/resources/post/:rid', async (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error');
+    if (!req.cookies.token) return res.redirect('/login');
     try {
         const user = JSON.parse(req.cookies.user);
         await axios.post(`${API_URL}/posts`, { resourceId: req.params.rid, userId: user._id, conteudo: req.body.conteudo }, { headers: { Authorization: req.cookies.token } });
@@ -266,7 +325,7 @@ router.post('/resources/post/:rid', async (req, res) => {
 
 // POST Novo Comentário num Post
 router.post('/resources/post/:pid/comment', async (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error');
+    if (!req.cookies.token) return res.redirect('/login');
     try {
         const resourceId = req.body.resourceId;
         await axios.post(`${API_URL}/posts/${req.params.pid}/comment`, { conteudo: req.body.conteudo }, { headers: { Authorization: req.cookies.token } });
@@ -276,7 +335,7 @@ router.post('/resources/post/:pid/comment', async (req, res) => {
 
 // POST Novo Rating
 router.post('/resources/rating/:rid', async (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error');
+    if (!req.cookies.token) return res.redirect('/login');
     try {
         const config = { headers: { Authorization: req.cookies.token } };
         const user = JSON.parse(req.cookies.user);
@@ -287,12 +346,12 @@ router.post('/resources/rating/:rid', async (req, res) => {
             const newPost = await axios.post(`${API_URL}/posts`, { resourceId: req.params.rid, userId: 'system', conteudo: 'Ratings e Comentários Gerais' }, config);
             postId = newPost.data._id;
         }
-        await axios.post(`${API_URL}/posts/${postId}/rating`, { userId: user._id, estrelas: req.body.estrelas }, config);
+        await axios.post(`${API_URL}/posts/${postId}/rating`, { userId: user._id, estrelas: req.body.estrelas }, { headers: { Authorization: req.cookies.token } });
         res.redirect(`/resources/${req.params.rid}`);
     } catch (error) { res.render('error', { message: 'Erro ao submeter rating', error: error }); }
 });
 
-// --- ÁREA PÚBLICA (Login/Registo) ---
+// --- ÁREA PÚBLICA ---
 
 router.get('/login', (req, res) => res.render('login', { title: 'EduPortal - Login' }));
 router.post('/login', async (req, res) => {
@@ -317,20 +376,6 @@ router.post('/register', async (req, res) => {
 
 router.get('/logout', (req, res) => { res.clearCookie('token'); res.clearCookie('user'); res.redirect('/'); });
 router.get('/help', (req, res) => res.render('help', { title: 'EduPortal - Ajuda' }));
-
-// Documentação da API
-router.get('/api-docs-json', async (req, res) => {
-    try {
-        const response = await axios.get(`http://api_dados:16000/api-docs-json`);
-        res.json(response.data);
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao obter a especificação da API" });
-    }
-});
-
-router.get('/api-docs', (req, res) => {
-    res.render('api_docs', { title: 'EduPortal - Documentação da API' });
-});
 
 // --- ÁREA DO UTILIZADOR (Perfil) ---
 
@@ -374,10 +419,7 @@ router.get('/resources/edit/:id', async (req, res) => {
         const response = await axios.get(`${API_URL}/resources/${req.params.id}`, config);
         const resource = response.data;
         const user = JSON.parse(req.cookies.user);
-        
-        // Apenas o dono pode editar (Admin já não tem permissão aqui)
-        if (resource.produtor !== user._id) return res.status(404).render('error');
-        
+        if (resource.produtor !== user._id && user.nivel !== 'admin') return res.status(404).render('error');
         res.render('edit_resource', { title: `EduPortal - Editar Recurso`, resource: resource });
     } catch (error) { res.status(404).render('error'); }
 });
@@ -389,10 +431,7 @@ router.post('/resources/edit/:id', async (req, res) => {
         const response = await axios.get(`${API_URL}/resources/${req.params.id}`, config);
         const resource = response.data;
         const user = JSON.parse(req.cookies.user);
-        
-        // Validar propriedade no POST também
-        if (resource.produtor !== user._id) return res.status(404).render('error');
-
+        if (resource.produtor !== user._id && user.nivel !== 'admin') return res.status(404).render('error');
         if (req.body.hashtags && typeof req.body.hashtags === 'string') req.body.hashtags = req.body.hashtags.split(',').map(s => s.trim()).filter(s => s.length > 0);
         await axios.put(`${API_URL}/resources/${req.params.id}`, req.body, config);
         await axios.post(`${API_URL}/news`, { conteudo: `Recurso atualizado: ${req.body.titulo}`, tipo: 'manual', resourceId: req.params.id });
