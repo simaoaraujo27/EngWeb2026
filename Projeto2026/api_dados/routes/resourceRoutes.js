@@ -170,6 +170,7 @@ router.post('/ingest', auth.verificaAcesso, authz.requireProducer, upload.single
             ano: req.body.ano,
             dataCriacao: req.body.dataCriacao,
             produtor: req.user._id,
+            visibilidade: req.body.visibilidade || 'publico',
             hashtags: req.body.hashtags ? (typeof req.body.hashtags === 'string' ? JSON.parse(req.body.hashtags) : req.body.hashtags) : [],
             files: filesMetadata
         };
@@ -245,7 +246,7 @@ router.get('/:id/file/:filename', async (req, res) => {
 });
 
 // --- Rota de Download (DIP) ---
-router.get('/download/:id', async (req, res) => {
+router.get('/download/:id', auth.autenticacaoOpcional, async (req, res) => {
     try {
         const resourceId = req.params.id;
 
@@ -257,6 +258,13 @@ router.get('/download/:id', async (req, res) => {
         const resource = await Resource.getResource(resourceId);
         if (!resource) {
             return res.status(404).json({ message: "Recurso não encontrado." });
+        }
+
+        // Verificar visibilidade para download
+        if (resource.visibilidade === 'privado') {
+            if (!req.user || (req.user.nivel !== 'admin' && req.user._id !== resource.produtor)) {
+                return res.status(403).json({ message: "Acesso Negado para download: Este recurso é privado." });
+            }
         }
 
         const resourcePath = path.join(__dirname, '../storage/resources/', resourceId);
@@ -288,7 +296,16 @@ router.get('/download/:id', async (req, res) => {
 router.get('/', auth.autenticacaoOpcional, (req, res) => {
     let filter = {};
 
-    // Aplicar filtros de query adicionais
+    // Se não for admin, aplicar restrições de visibilidade
+    if (!req.user || req.user.nivel !== 'admin') {
+        const userId = req.user ? req.user._id : null;
+        filter.$or = [
+            { visibilidade: 'publico' },
+            { produtor: userId }
+        ];
+    }
+
+    // Aplicar filtros de query adicionais (merge com o filtro de visibilidade)
     if (req.query.tipo) filter.tipo = req.query.tipo;
     if (req.query.hashtag) filter.hashtags = req.query.hashtag;
     if (req.query.produtor) filter.produtor = req.query.produtor;
@@ -315,6 +332,13 @@ router.get('/:id', auth.autenticacaoOpcional, async (req, res) => {
     try {
         const resource = await Resource.getResource(req.params.id);
         if (!resource) return res.status(404).json({ message: "Recurso não encontrado" });
+
+        // Verificar visibilidade
+        if (resource.visibilidade === 'privado') {
+            if (!req.user || (req.user.nivel !== 'admin' && req.user._id !== resource.produtor)) {
+                return res.status(403).json({ message: "Acesso Negado: Este recurso é privado." });
+            }
+        }
 
         res.status(200).json(resource);
     } catch (erro) {

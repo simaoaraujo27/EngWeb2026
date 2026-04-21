@@ -59,6 +59,7 @@ router.post('/ingest', upload.single('zipFile'), async (req, res) => {
         form.append('subtitulo', req.body.subtitulo || '');
         form.append('ano', req.body.ano);
         form.append('tipo', req.body.tipo);
+        form.append('visibilidade', req.body.visibilidade || 'publico');
         form.append('dataCriacao', req.body.dataCriacao || '');
         form.append('produtor', user._id);
         

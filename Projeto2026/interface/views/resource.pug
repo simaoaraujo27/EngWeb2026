@@ -19,10 +19,12 @@ block content
                   | 📊
                 else if resource.tipo == 'tese'
                   | 🎓
-                else if resource.tipo == 'artigo'
+                else if resource.tipo == 'artigo' || resource.tipo == 'teste_exame'
                   | 📝
                 else if resource.tipo == 'aplicacao'
                   | 💻
+                else if resource.tipo == 'problema_resolvido'
+                  | 🧩
                 else
                   | 📄
               div(class="flex-1")
