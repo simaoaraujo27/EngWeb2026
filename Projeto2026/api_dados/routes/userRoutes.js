@@ -71,7 +71,12 @@ router.post('/login', async (req, res) => {
         const user = await User.getUser(req.body._id);
         if (!user) return res.status(401).json({ message: "Utilizador não encontrado." });
 
+        if (user.ativo === false) {
+            return res.status(403).json({ message: "Esta conta está desativada. Contacte o administrador." });
+        }
+
         const isMatch = await bcrypt.compare(req.body.password, user.password);
+
         if (!isMatch) return res.status(401).json({ message: "Password incorreta." });
 
         // Atualizar data de último acesso
@@ -197,32 +202,26 @@ const fs = require('fs');
 
 // ... resto das rotas ...
 
-// Remover um utilizador (Protegido - Admin apenas)
+// Desativar um utilizador (Soft Delete - Admin apenas)
 router.delete('/:id', auth.verificaAcesso, authz.requireAdmin, async (req, res) => {
     try {
         const userId = req.params.id;
 
-        // 1. Obter lista de recursos do utilizador para apagar pastas físicas
-        const userResources = await Resource.list(); // Obter todos (poderia ser otimizado)
-        const toDelete = userResources.filter(r => r.produtor === userId);
+        // 1. Tornar todos os recursos do utilizador PRIVADOS (em vez de apagar)
+        const userResources = await Resource.list();
+        const toDisable = userResources.filter(r => r.produtor === userId);
 
-        for (const r of toDelete) {
-            const resourcePath = path.join(__dirname, '../storage/resources/', r._id);
-            if (fs.existsSync(resourcePath)) {
-                fs.rmSync(resourcePath, { recursive: true, force: true });
-            }
+        for (const r of toDisable) {
+            await Resource.update(r._id, { visibilidade: 'privado' });
         }
 
-        // 2. Remover recursos da base de dados
-        await Resource.removeByProducer(userId);
+        // 2. Desativar o utilizador
+        await User.update(userId, { ativo: false });
 
-        // 3. Remover o utilizador
-        await User.remove(userId);
-
-        res.status(200).json({ message: "Utilizador e os seus recursos removidos com sucesso" });
+        res.status(200).json({ message: "Utilizador desativado e os seus recursos tornados privados com sucesso" });
     } catch (error) {
-        console.error('Delete user error:', error);
-        res.status(500).json({ message: "Erro na remoção do utilizador e recursos" });
+        console.error('Disable user error:', error);
+        res.status(500).json({ message: "Erro na desativação do utilizador" });
     }
 });
 

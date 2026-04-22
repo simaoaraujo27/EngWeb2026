@@ -232,6 +232,15 @@ router.get('/admin/delete-user/:id', async (req, res) => {
     } catch (error) { res.status(404).render('error'); }
 });
 
+// GET Reativar Utilizador (Admin)
+router.get('/admin/activate-user/:id', async (req, res) => {
+    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') return res.status(404).render('error');
+    try {
+        await axios.put(`${API_URL}/users/${req.params.id}`, { ativo: true }, { headers: { Authorization: req.cookies.token } });
+        res.redirect('/admin');
+    } catch (error) { res.status(404).render('error'); }
+});
+
 // GET Exportação Global (Admin)
 router.get('/admin/export', async (req, res) => {
     if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') return res.status(404).render('error');
@@ -362,7 +371,12 @@ router.post('/login', async (req, res) => {
         res.cookie('token', response.data.token, cookieOptions);
         res.cookie('user', JSON.stringify(response.data.user), cookieOptions);
         res.redirect('/');
-    } catch (error) { res.render('login', { title: 'EduPortal - Login', error: "Credenciais inválidas." }); }
+    } catch (error) {
+        const errorMsg = error.response && error.response.data && error.response.data.message 
+            ? error.response.data.message 
+            : "Credenciais inválidas.";
+        res.render('login', { title: 'EduPortal - Login', error: errorMsg });
+    }
 });
 
 router.get('/register', (req, res) => res.render('register', { title: 'EduPortal - Registo' }));

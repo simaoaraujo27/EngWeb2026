@@ -35,7 +35,7 @@ block content
               tr
                 th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Nome
                 th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Nível
-                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Último Acesso
+                th(class="px-8 py-4 text-center text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Estado
                 th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Ações
             tbody(class="divide-y divide-gray-50 dark:divide-slate-800")
               each u in users
@@ -46,15 +46,18 @@ block content
                   td(class="px-8 py-4")
                     span(class="px-2 py-1 rounded-md text-[10px] font-bold uppercase " + (u.nivel=='admin' ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' : (u.nivel=='produtor' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400')))
                       = u.nivel
-                  td(class="px-8 py-4")
-                    p(class="text-xs text-gray-500 dark:text-slate-400")
-                      if u.dataUltimoAcesso
-                        = new Date(u.dataUltimoAcesso).toLocaleString('pt-PT')
-                      else
-                        span(class="text-gray-300 dark:text-slate-600 italic") Nunca
+                  td(class="px-8 py-4 text-center")
+                    if u.ativo
+                      span(class="px-2 py-1 bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400 text-[10px] font-bold rounded-md uppercase") Ativo
+                    else
+                      span(class="px-2 py-1 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-[10px] font-bold rounded-md uppercase") Inativo
                   td(class="px-8 py-4 text-right")
-                    a(href=`/admin/delete-user/${u._id}` class="p-2 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors" onclick="return confirm('Eliminar utilizador permanentemente?')")
-                      i(data-lucide="trash-2" class="w-4 h-4")
+                    if u.ativo
+                      a(href=`/admin/delete-user/${u._id}` class="p-2 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors" title="Desativar Conta" onclick="return confirm('Desativar conta do utilizador?')")
+                        i(data-lucide="user-minus" class="w-4 h-4")
+                    else
+                      a(href=`/admin/activate-user/${u._id}` class="p-2 text-gray-400 dark:text-slate-500 hover:text-green-600 dark:hover:text-green-400 transition-colors" title="Reativar Conta")
+                        i(data-lucide="user-check" class="w-4 h-4")
 
       // Resources Management
       div(class="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden")

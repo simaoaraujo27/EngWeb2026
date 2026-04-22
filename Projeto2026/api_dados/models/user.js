@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
     },
     dataRegisto: { type: Date, default: Date.now },
     dataUltimoAcesso: Date,
+    ativo: { type: Boolean, default: true },
     password: { type: String, required: true }
 }, { versionKey: false });
 

@@ -23,12 +23,12 @@ async function populate() {
 
         // 1. Utilizadores (Docentes + Alunos Genéricos)
         const users = [
-            { _id: 'jcr@di.uminho.pt', nome: 'José Carlos Ramalho', nivel: 'admin', filiacao: 'Universidade do Minho', departamento: 'DI', password: hashedPassword },
-            { _id: 'prh@di.uminho.pt', nome: 'Pedro Rangel Henriques', nivel: 'produtor', filiacao: 'Universidade do Minho', departamento: 'DI', password: hashedPassword },
-            { _id: 'a10001@alunos.uminho.pt', nome: 'Ana Martins', nivel: 'produtor', filiacao: 'Engenharia Informática', curso: 'MIEI', password: hashedPassword },
-            { _id: 'a10002@alunos.uminho.pt', nome: 'Carlos Silva', nivel: 'produtor', filiacao: 'Engenharia Informática', curso: 'LCC', password: hashedPassword },
-            { _id: 'a10003@alunos.uminho.pt', nome: 'Joana Rodrigues', nivel: 'produtor', filiacao: 'Engenharia Informática', curso: 'MIEI', password: hashedPassword },
-            { _id: 'a10004@alunos.uminho.pt', nome: 'Ricardo Pereira', nivel: 'consumidor', filiacao: 'Engenharia Informática', curso: 'LCC', password: hashedPassword }
+            { _id: 'jcr@di.uminho.pt', nome: 'José Carlos Ramalho', nivel: 'admin', filiacao: 'Universidade do Minho', departamento: 'DI', password: hashedPassword, ativo: true },
+            { _id: 'prh@di.uminho.pt', nome: 'Pedro Rangel Henriques', nivel: 'produtor', filiacao: 'Universidade do Minho', departamento: 'DI', password: hashedPassword, ativo: true },
+            { _id: 'a10001@alunos.uminho.pt', nome: 'Ana Martins', nivel: 'produtor', filiacao: 'Engenharia Informática', curso: 'MIEI', password: hashedPassword, ativo: true },
+            { _id: 'a10002@alunos.uminho.pt', nome: 'Carlos Silva', nivel: 'produtor', filiacao: 'Engenharia Informática', curso: 'LCC', password: hashedPassword, ativo: true },
+            { _id: 'a10003@alunos.uminho.pt', nome: 'Joana Rodrigues', nivel: 'produtor', filiacao: 'Engenharia Informática', curso: 'MIEI', password: hashedPassword, ativo: true },
+            { _id: 'a10004@alunos.uminho.pt', nome: 'Ricardo Pereira', nivel: 'consumidor', filiacao: 'Engenharia Informática', curso: 'LCC', password: hashedPassword, ativo: true }
         ];
         await User.insertMany(users);
 
