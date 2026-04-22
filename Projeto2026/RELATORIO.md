@@ -1,8 +1,11 @@
 # Relatório Técnico: EduPortal - Plataforma de Gestão de Recursos Educativos
 
 **Unidade Curricular:** Engenharia Web (2025/2026)  
+
 **Projeto:** Proposta 1 - Plataforma de Gestão e Disponibilização de Recursos Educativos  
+
 **Autores:** Francisco Barbosa (A107286), Pedro Morais (A107319), Simão Araújo (A106855)
+
 **Instituição:** Universidade do Minho - Escola de Engenharia  
 
 ---
