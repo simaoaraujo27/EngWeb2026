@@ -1,5 +1,4 @@
 services:
-  # 1. Base de Dados - MongoDB
   mongodb:
     image: mongo:7.0
     container_name: projeto_mongodb
@@ -7,47 +6,30 @@ services:
       - "27017:27017"
     volumes:
       - ./data/db:/data/db
-    networks:
-      - projeto_network
-    restart: "no"
 
-  # 2. API de Dados
   api_dados:
     build: ./api_dados
     container_name: projeto_api_dados
     environment:
-      - PORT=16000
       - MONGODB_URI=mongodb://mongodb:27017/projetoEW
-      - NODE_ENV=development
       - JWT_SECRET=${JWT_SECRET:-EngWeb2026-Projeto-Secret}
+      - PORT=16000
     depends_on:
       - mongodb
     volumes:
       - ./api_dados:/usr/src/app
       - /usr/src/app/node_modules
-    networks:
-      - projeto_network
-    restart: "no"
 
-  # 3. Interface Web
   interface:
     build: ./interface
     container_name: projeto_interface
     ports:
       - "16001:16001"
     environment:
-      - PORT=16001
       - API_URL=http://api_dados:16000
-      - NODE_ENV=development
+      - PORT=16001
     depends_on:
       - api_dados
     volumes:
       - ./interface:/usr/src/app
       - /usr/src/app/node_modules
-    networks:
-      - projeto_network
-    restart: "no"
-
-networks:
-  projeto_network:
-    driver: bridge
