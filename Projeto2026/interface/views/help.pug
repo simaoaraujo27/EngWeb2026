@@ -28,18 +28,28 @@ block content
       section(class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm transition-colors")
         h2(class="text-xl font-bold text-edu-dark dark:text-white mb-4 flex items-center gap-2")
           i(data-lucide="package" class="text-primary w-6 h-6")
-          | O que é um pacote SIP?
+          | Como submeter um recurso (SIP)?
         p(class="text-sm text-gray-600 dark:text-slate-400 leading-relaxed mb-4")
-          | SIP (Submission Information Package) é o formato padrão para submeter recursos. 
-          | No EduPortal, deves carregar um ficheiro **ZIP** que contenha obrigatoriamente um ficheiro chamado 
+          | No EduPortal, as submissões seguem o padrão de arquivo 
+          strong BagIt
+          |. Deves carregar um ficheiro **ZIP** contendo os teus documentos e um ficheiro de inventário chamado 
           code(class="bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded font-mono text-primary dark:text-blue-400") manifest.txt
-          |  na raiz.
+          |.
+
+        h3(class="text-sm font-bold text-edu-dark dark:text-white mb-2") Como criar o manifest.txt automaticamente:
+        div(class="bg-edu-dark dark:bg-black p-4 rounded-xl font-mono text-xs text-blue-200 mb-6")
+          p # Linux / macOS (No terminal, dentro da pasta dos ficheiros)
+          p md5sum * > manifest.txt
+          p
+          p # Windows (PowerShell)
+          p Get-FileHash * -Algorithm MD5 | Format-Table -HideTableHeaders > manifest.txt
+
         div(class="bg-edu-bg dark:bg-slate-800/50 p-4 rounded-xl border border-gray-200 dark:border-slate-700 font-mono text-xs text-gray-700 dark:text-slate-300 transition-colors")
           p meu-recurso.zip/
-          p ├── manifest.txt (Lista de ficheiros)
-          p ├── tese-final.pdf
-          p └── anexos/
-          p     └── dados.csv
+          p ├── manifest.txt (Ex: a1b2c3d4... ficheiro.pdf)
+          p ├── aula1.pdf
+          p └── exercicios.zip
+
 
       // Section 3
       section(class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm transition-colors")

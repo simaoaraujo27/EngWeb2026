@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  div(class="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800")
+  div(class="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 transition-colors")
     div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
       h1(class="text-3xl font-bold text-edu-dark dark:text-white mb-2") Explorar Recursos
       p(class="text-edu-muted dark:text-slate-400") #{resources.length} recursos disponíveis para consulta.
@@ -14,9 +14,9 @@ block content
         div
           h3(class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-4") Categorias
           div(class="flex flex-col gap-1")
-            each type in [{v: '', l: 'Todos os Recursos'}, {v: 'tese', l: '🎓 Teses'}, {v: 'artigo', l: '📝 Artigos'}, {v: 'slides', l: '📊 Slides'}, {v: 'relatorio', l: '📄 Relatórios'}, {v: 'aplicacao', l: '💻 Aplicações'}, {v: 'teste_exame', l: '📝 Testes / Exames'}, {v: 'problema_resolvido', l: '🧩 Problemas Resolvidos'}]
+            each type in [{v: '', l: 'Todos os Recursos'}, {v: 'tese', l: '🎓 Teses'}, {v: 'artigo', l: '📝 Artigos'}, {v: 'slides', l: '📊 Slides'}, {v: 'relatorio', l: '📄 Relatórios'}, {v: 'aplicacao', l: '💻 Aplicações'}]
               a(href=type.v ? `/resources?tipo=${type.v}` : '/resources'
-                class=(!type.v && !queryTipo) || (queryTipo == type.v) ? 'px-4 py-2 rounded-xl text-sm font-bold bg-primary/10 text-primary' : 'px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'
+                class=(!type.v && !queryTipo) || (queryTipo == type.v) ? 'px-4 py-2 rounded-xl text-sm font-bold bg-primary/10 text-primary' : 'px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors'
               )= type.l
 
         div
@@ -28,61 +28,66 @@ block content
               )= ano
 
         if queryTipo || queryAno || queryHashtag
-          a(href="/resources" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-red-500 bg-red-50 dark:bg-red-950/30 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/40 transition-all")
+          a(href="/resources" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-red-500 bg-red-50 dark:bg-red-900/20 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/40 transition-all")
             i(data-lucide="x" class="w-4 h-4")
             | Limpar Filtros
 
       // Main Grid
       div(class="lg:col-span-3")
-        // Search Bar (Simulada por agora)
-        div(class="mb-8 relative")
-          i(data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 w-5 h-5")
-          input(id="search-input" class="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-white" type="text" placeholder="Procurar no título ou autor...")
+        // Search Bar
+        div(class="mb-8 flex gap-2")
+          div(class="relative flex-1")
+            i(data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 w-5 h-5")
+            input(id="search-input" class="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-white" type="text" placeholder="Procurar no título ou autor...")
+          button(id="search-btn" class="px-6 py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary-dark transition-all shadow-md flex items-center gap-2 shrink-0")
+            i(data-lucide="filter" class="w-5 h-5")
+            span Procurar
 
         if resources.length > 0
-          div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
+          div(id="resources-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6")
             each r in resources
-              div(class="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden hover:shadow-xl transition-all flex flex-col group")
-                div(class="p-6 flex-grow")
-                  div(class="flex items-start justify-between mb-4")
-                    div(class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform")
-                      if r.tipo == 'slides'
-                        | 📊
-                      else if r.tipo == 'tese'
-                        | 🎓
-                      else if r.tipo == 'artigo' || r.tipo == 'teste_exame'
-                        | 📝
-                      else if r.tipo == 'aplicacao'
-                        | 💻
-                      else if r.tipo == 'problema_resolvido'
-                        | 🧩
-                      else
-                        | 📄
-                    div(class="text-right")
-                        span(class="block text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase")= r.tipo
-                        span(class="text-xs font-bold text-primary")= r.ano || 'S/ Ano'
-                  
-                  a(href=`/resources/${r._id}`)
-                    h3(class="text-lg font-bold text-edu-dark dark:text-white mb-2 group-hover:text-primary transition-colors line-clamp-2")= r.titulo
-                  if r.subtitulo
-                    p(class="text-sm text-edu-muted dark:text-slate-400 mb-4 line-clamp-1")= r.subtitulo
-                  
-                  div(class="flex flex-wrap gap-2")
-                    each tag in r.hashtags.slice(0, 3)
-                      span(class="text-[10px] font-bold text-primary bg-primary/5 dark:bg-primary/10 px-2 py-1 rounded-md uppercase tracking-tight") # #{tag}
+              div(class="resource-card-container")
+                div(class="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 overflow-hidden hover:shadow-xl transition-all flex flex-col group h-full")
+                  div(class="p-6 flex-grow")
+                    div(class="flex items-start justify-between mb-4")
+                      div(class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform")
+                        if r.tipo == 'slides'
+                          | 📊
+                        else if r.tipo == 'tese'
+                          | 🎓
+                        else if r.tipo == 'artigo' || r.tipo == 'teste_exame'
+                          | 📝
+                        else if r.tipo == 'aplicacao'
+                          | 💻
+                        else if r.tipo == 'problema_resolvido'
+                          | 🧩
+                        else
+                          | 📄
+                      div(class="text-right")
+                          span(class="block text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase")= r.tipo
+                          span(class="text-xs font-bold text-primary")= r.ano || 'S/ Ano'
+                    
+                    a(href=`/resources/${r._id}`)
+                      h3(class="text-lg font-bold text-edu-dark dark:text-white mb-2 group-hover:text-primary transition-colors line-clamp-2")= r.titulo
+                    if r.subtitulo
+                      p(class="text-sm text-edu-muted dark:text-slate-400 mb-4 line-clamp-1")= r.subtitulo
+                    
+                    div(class="flex flex-wrap gap-2")
+                      each tag in r.hashtags.slice(0, 3)
+                        span(class="text-[10px] font-bold text-primary bg-primary/5 dark:bg-primary/10 px-2 py-1 rounded-md uppercase tracking-tight") # #{tag}
 
-                div(class="px-6 py-4 bg-gray-50/50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between")
-                  div(class="flex items-center gap-4 text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-tighter")
-                    span(class="flex items-center gap-1")
-                      i(data-lucide="download" class="w-3 h-3")
-                      | #{r.downloads}
-                    span(class="flex items-center gap-1")
-                      i(data-lucide="user" class="w-3 h-3")
-                      | #{r.produtor.split('@')[0]}
-                  
-                  a(href=`/resources/${r._id}` class="text-xs font-bold text-primary hover:text-primary-dark flex items-center gap-1")
-                    | DETALHES
-                    i(data-lucide="arrow-right" class="w-3 h-3")
+                  div(class="px-6 py-4 bg-gray-50/50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between")
+                    div(class="flex items-center gap-4 text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-tighter")
+                      span(class="flex items-center gap-1")
+                        i(data-lucide="download" class="w-3 h-3")
+                        | #{r.downloads}
+                      span(class="flex items-center gap-1")
+                        i(data-lucide="user" class="w-3 h-3")
+                        | #{r.produtor.split('@')[0]}
+                    
+                    a(href=`/resources/${r._id}` class="text-xs font-bold text-primary hover:text-primary-dark flex items-center gap-1")
+                      | DETALHES
+                      i(data-lucide="arrow-right" class="w-3 h-3")
         else
           div(class="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800")
             div(class="w-20 h-20 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6")
@@ -93,17 +98,24 @@ block content
               | Ver Todos os Recursos
 
   script.
-    // Lógica de pesquisa simples no cliente para o título
-    document.getElementById('search-input').addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const cards = document.querySelectorAll('.group');
-        cards.forEach(card => {
-            const title = card.querySelector('h3').textContent.toLowerCase();
-            const subtitle = card.querySelector('p')?.textContent.toLowerCase() || '';
+    document.getElementById('search-btn').addEventListener('click', () => {
+        const term = document.getElementById('search-input').value.toLowerCase();
+        const containers = document.querySelectorAll('.resource-card-container'); 
+        
+        containers.forEach(container => {
+            const title = container.querySelector('h3').textContent.toLowerCase();
+            const subtitle = container.querySelector('p')?.textContent.toLowerCase() || '';
+            
             if (title.includes(term) || subtitle.includes(term)) {
-                card.parentElement.style.display = 'block';
+                container.style.display = 'block';
             } else {
-                card.parentElement.style.display = 'none';
+                container.style.display = 'none';
             }
         });
+    });
+
+    document.getElementById('search-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('search-btn').click();
+        }
     });

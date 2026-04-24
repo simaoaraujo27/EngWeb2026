@@ -50,12 +50,14 @@ module.exports.exportAll = async () => {
     return zip.toBuffer();
 };
 
-module.exports.importAll = async (zipBuffer) => {
-    const zip = new AdmZip(zipBuffer);
+module.exports.importAll = async (source) => {
+    // AdmZip aceita tanto buffer como string (caminho)
+    const zip = new AdmZip(source);
     const zipEntries = zip.getEntries();
 
-    // 1. Limpar coleções (Opcional, mas recomendado para consistência)
-    // Se preferires fazer merge, podes remover estas linhas
+    console.log("Iniciando importação global...");
+
+    // 1. Limpar coleções
     await UserDoc.deleteMany({});
     await ResourceDoc.deleteMany({});
     await Post.deleteMany({});
@@ -63,26 +65,36 @@ module.exports.importAll = async (zipBuffer) => {
 
     // 2. Importar JSONs
     for (const entry of zipEntries) {
-        if (entry.entryName === "users.json") {
-            const data = JSON.parse(entry.getData().toString("utf8"));
-            await UserDoc.insertMany(data);
-        } else if (entry.entryName === "resources.json") {
-            const data = JSON.parse(entry.getData().toString("utf8"));
-            await ResourceDoc.insertMany(data);
-        } else if (entry.entryName === "posts.json") {
-            const data = JSON.parse(entry.getData().toString("utf8"));
-            await Post.insertMany(data);
-        } else if (entry.entryName === "news.json") {
-            const data = JSON.parse(entry.getData().toString("utf8"));
-            await News.insertMany(data);
+        try {
+            if (entry.entryName === "users.json") {
+                const data = JSON.parse(entry.getData().toString("utf8"));
+                if (data.length > 0) await UserDoc.insertMany(data);
+            } else if (entry.entryName === "resources.json") {
+                const data = JSON.parse(entry.getData().toString("utf8"));
+                if (data.length > 0) await ResourceDoc.insertMany(data);
+            } else if (entry.entryName === "posts.json") {
+                const data = JSON.parse(entry.getData().toString("utf8"));
+                if (data.length > 0) await Post.insertMany(data);
+            } else if (entry.entryName === "news.json") {
+                const data = JSON.parse(entry.getData().toString("utf8"));
+                if (data.length > 0) await News.insertMany(data);
+            }
+        } catch (e) {
+            console.error(`Erro ao importar ${entry.entryName}:`, e.message);
         }
     }
 
     // 3. Restaurar storage/resources
     const storagePath = path.join(__dirname, '../storage/resources');
+    
+    // Limpar storage atual antes de restaurar (evita lixo)
+    if (fs.existsSync(storagePath)) {
+        fs.rmSync(storagePath, { recursive: true, force: true });
+    }
+    fs.mkdirSync(storagePath, { recursive: true });
+
     zipEntries.forEach(entry => {
         if (entry.entryName.startsWith("storage/resources/") && !entry.isDirectory) {
-            // Remover o prefixo "storage/resources/" para extrair no local correto
             const relativePath = entry.entryName.replace("storage/resources/", "");
             const fullPath = path.join(storagePath, relativePath);
             const dir = path.dirname(fullPath);
@@ -92,5 +104,6 @@ module.exports.importAll = async (zipBuffer) => {
         }
     });
 
+    console.log("Importação concluída com sucesso.");
     return { message: "Importação concluída com sucesso." };
 };

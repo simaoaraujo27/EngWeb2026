@@ -47,12 +47,10 @@ router.get('/', (req, res) => {
 });
 
 // Inserir uma notícia
-router.post('/', (req, res, next) => {
-    // Se for uma notícia manual, exige admin. Se for do sistema, permite.
-    if (req.body.tipo === 'manual') {
-        return auth.verificaAcesso(req, res, () => {
-            authz.requireAdmin(req, res, next);
-        });
+router.post('/', auth.verificaAcesso, (req, res, next) => {
+    // Apenas Admin pode criar notícias manuais (avisos do sistema)
+    if (req.body.tipo === 'manual' && req.user.nivel !== 'admin') {
+        return res.status(403).json({ message: "Apenas administradores podem criar notícias manuais." });
     }
     next();
 }, (req, res) => {
