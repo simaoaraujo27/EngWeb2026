@@ -8,6 +8,24 @@ const fs = require('fs');
 const API_URL = process.env.API_URL || "http://localhost:16000";
 const upload = multer({ dest: 'uploads/' });
 
+// Middleware para verificar se o utilizador está autenticado
+const verifyToken = (req, res, next) => {
+    if (req.cookies.token) {
+        next();
+    } else {
+        res.redirect('/login');
+    }
+};
+
+// Middleware para verificar se o utilizador é admin (sem redirecionar para login se falhar, para esconder a rota)
+const verifyAdmin = (req, res, next) => {
+    if (req.cookies.token && res.locals.user && res.locals.user.nivel === 'admin') {
+        next();
+    } else {
+        res.status(404).render('error', { title: 'Página Não Encontrada' });
+    }
+};
+
 // Middleware para passar dados do utilizador para as vistas PUG
 router.use((req, res, next) => {
     if (req.cookies.user) {
@@ -43,15 +61,12 @@ router.get('/', async (req, res) => {
 });
 
 // GET Ingestão
-router.get('/ingest', (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error', { title: 'Página Não Encontrada' });
+router.get('/ingest', verifyToken, (req, res) => {
     res.render('ingest', { title: 'EduPortal - Ingestão de Recurso' });
 });
 
 // POST Ingestão
-router.post('/ingest', upload.single('zipFile'), async (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error');
-    
+router.post('/ingest', verifyToken, upload.single('zipFile'), async (req, res) => {
     try {
         const user = JSON.parse(req.cookies.user);
         const form = new FormData();
@@ -133,13 +148,13 @@ router.get('/resources', async (req, res) => {
 });
 
 // GET Download (DIP)
-router.get('/resources/download/:id', async (req, res) => {
+router.get('/resources/download/:id', verifyToken, async (req, res) => {
     try {
         const config = {
             url: `${API_URL}/resources/download/${req.params.id}`,
             method: 'GET',
             responseType: 'stream',
-            headers: req.cookies.token ? { Authorization: req.cookies.token } : {}
+            headers: { Authorization: req.cookies.token }
         };
         const response = await axios(config);
         res.set('Content-Type', 'application/zip');
@@ -151,13 +166,13 @@ router.get('/resources/download/:id', async (req, res) => {
 });
 
 // GET Download de Ficheiro Individual
-router.get('/resources/:id/file/:filename', async (req, res) => {
+router.get('/resources/:id/file/:filename', verifyToken, async (req, res) => {
     try {
         const response = await axios({
             url: `${API_URL}/resources/${req.params.id}/file/${encodeURIComponent(req.params.filename)}`,
             method: 'GET',
             responseType: 'stream',
-            headers: req.cookies.token ? { Authorization: req.cookies.token } : {}
+            headers: { Authorization: req.cookies.token }
         });
         res.set('Content-Disposition', `attachment; filename="${req.params.filename}"`);
         response.data.pipe(res);
@@ -199,10 +214,7 @@ router.get('/resources/:id', async (req, res) => {
 
 // --- ÁREA DE ADMINISTRAÇÃO ---
 
-router.get('/admin', async (req, res) => {
-    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') {
-        return res.status(404).render('error', { title: 'Página Não Encontrada' });
-    }
+router.get('/admin', verifyAdmin, async (req, res) => {
     try {
         const config = { headers: { Authorization: req.cookies.token } };
         const usersResponse = await axios.get(`${API_URL}/users`, config);
@@ -211,24 +223,21 @@ router.get('/admin', async (req, res) => {
     } catch (error) { res.status(404).render('error'); }
 });
 
-router.get('/admin/delete-resource/:id', async (req, res) => {
-    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') return res.status(404).render('error');
+router.get('/admin/delete-resource/:id', verifyAdmin, async (req, res) => {
     try {
         await axios.delete(`${API_URL}/resources/${req.params.id}`, { headers: { Authorization: req.cookies.token } });
         res.redirect('/admin');
     } catch (error) { res.status(404).render('error'); }
 });
 
-router.get('/admin/delete-user/:id', async (req, res) => {
-    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') return res.status(404).render('error');
+router.get('/admin/delete-user/:id', verifyAdmin, async (req, res) => {
     try {
         await axios.delete(`${API_URL}/users/${req.params.id}`, { headers: { Authorization: req.cookies.token } });
         res.redirect('/admin');
     } catch (error) { res.status(404).render('error'); }
 });
 
-router.get('/admin/export', async (req, res) => {
-    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') return res.status(404).render('error');
+router.get('/admin/export', verifyAdmin, async (req, res) => {
     try {
         const response = await axios({ url: `${API_URL}/admin/export`, method: 'GET', headers: { Authorization: req.cookies.token }, responseType: 'stream' });
         res.set('Content-Type', 'application/zip');
@@ -237,8 +246,7 @@ router.get('/admin/export', async (req, res) => {
     } catch (error) { res.status(404).render('error'); }
 });
 
-router.post('/admin-import', upload.single('zipFile'), async (req, res) => {
-    if (!req.cookies.token || !res.locals.user || res.locals.user.nivel !== 'admin') return res.status(404).render('error');
+router.post('/admin-import', verifyAdmin, upload.single('zipFile'), async (req, res) => {
     try {
         const form = new FormData();
         form.append('zipFile', fs.createReadStream(req.file.path), {
@@ -261,8 +269,7 @@ router.post('/admin-import', upload.single('zipFile'), async (req, res) => {
 
 // --- INTERATIVIDADE ---
 
-router.post('/resources/post/:rid', async (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error');
+router.post('/resources/post/:rid', verifyToken, async (req, res) => {
     try {
         const user = JSON.parse(req.cookies.user);
         await axios.post(`${API_URL}/posts`, { resourceId: req.params.rid, userId: user._id, conteudo: req.body.conteudo }, { headers: { Authorization: req.cookies.token } });
@@ -270,8 +277,7 @@ router.post('/resources/post/:rid', async (req, res) => {
     } catch (error) { res.render('error', { message: 'Erro ao publicar post', error: error }); }
 });
 
-router.post('/resources/post/:pid/comment', async (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error');
+router.post('/resources/post/:pid/comment', verifyToken, async (req, res) => {
     try {
         const resourceId = req.body.resourceId;
         await axios.post(`${API_URL}/posts/${req.params.pid}/comment`, { conteudo: req.body.conteudo }, { headers: { Authorization: req.cookies.token } });
@@ -279,8 +285,7 @@ router.post('/resources/post/:pid/comment', async (req, res) => {
     } catch (error) { res.render('error', { message: 'Erro ao publicar comentário', error: error }); }
 });
 
-router.post('/resources/rating/:rid', async (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error');
+router.post('/resources/rating/:rid', verifyToken, async (req, res) => {
     try {
         const config = { headers: { Authorization: req.cookies.token } };
         const user = JSON.parse(req.cookies.user);
@@ -348,8 +353,7 @@ router.get('/api-docs', (req, res) => res.render('api_docs', { title: 'EduPortal
 
 // --- ÁREA DO UTILIZADOR ---
 
-router.get('/profile', async (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error');
+router.get('/profile', verifyToken, async (req, res) => {
     try {
         const user = JSON.parse(req.cookies.user);
         const config = { headers: { Authorization: req.cookies.token } };
@@ -361,8 +365,7 @@ router.get('/profile', async (req, res) => {
     } catch (error) { res.status(404).render('error'); }
 });
 
-router.get('/profile/edit', async (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error');
+router.get('/profile/edit', verifyToken, async (req, res) => {
     try {
         const user = JSON.parse(req.cookies.user);
         const response = await axios.get(`${API_URL}/users/${user._id}`, { headers: { Authorization: req.cookies.token } });
@@ -370,8 +373,7 @@ router.get('/profile/edit', async (req, res) => {
     } catch (error) { res.status(404).render('error'); }
 });
 
-router.post('/profile/edit', async (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error');
+router.post('/profile/edit', verifyToken, async (req, res) => {
     try {
         const user = JSON.parse(req.cookies.user);
         const response = await axios.put(`${API_URL}/users/${user._id}`, req.body, { headers: { Authorization: req.cookies.token } });
@@ -380,8 +382,7 @@ router.post('/profile/edit', async (req, res) => {
     } catch (error) { res.status(404).render('error'); }
 });
 
-router.get('/resources/edit/:id', async (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error');
+router.get('/resources/edit/:id', verifyToken, async (req, res) => {
     try {
         const config = { headers: { Authorization: req.cookies.token } };
         const response = await axios.get(`${API_URL}/resources/${req.params.id}`, config);
@@ -392,8 +393,7 @@ router.get('/resources/edit/:id', async (req, res) => {
     } catch (error) { res.status(404).render('error'); }
 });
 
-router.post('/resources/edit/:id', async (req, res) => {
-    if (!req.cookies.token) return res.status(404).render('error');
+router.post('/resources/edit/:id', verifyToken, async (req, res) => {
     try {
         const config = { headers: { Authorization: req.cookies.token } };
         const response = await axios.get(`${API_URL}/resources/${req.params.id}`, config);

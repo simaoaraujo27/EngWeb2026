@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/projetoEW';
+const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://mongodb:27017/projetoEW';
 const STORAGE_PATH = path.join(__dirname, '../storage/resources');
 
 const User = require('../models/user');

@@ -1,1 +1,0 @@
-Conteúdo dummy para Resolução: Gestão de Memória Dinâmica em C

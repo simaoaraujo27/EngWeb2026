@@ -1,80 +1,56 @@
-# EduPortal - Plataforma de Gestão de Recursos Educativos
+# 🎓 EduPortal
 
-O **EduPortal** é uma plataforma full-stack para gestão, preservação e disseminação de recursos educativos digitais, seguindo o modelo **OAIS** e utilizando **BagIt** para garantir a integridade dos dados.
+Bem-vindo ao **EduPortal**! Esta é a nossa plataforma para partilhar e guardar recursos educativos (como aulas, exames e trabalhos). O sistema garante que os ficheiros estão seguros e organizados, usando normas de preservação digital de forma invisível para o utilizador.
 
-## 🚀 Como Executar
+---
 
-A aplicação está totalmente contentorizada com Docker, o que facilita o processo de instalação e execução.
+## 🚀 Como começar?
 
-### 1. Pré-requisitos
-*   [Docker](https://www.docker.com/get-started)
-*   [Docker Compose](https://docs.docker.com/compose/install/)
+Não precisas de instalar bases de dados ou bibliotecas manualmente. O projeto está todo "dentro" do Docker.
 
-### 2. Levantar a Infraestrutura
-Na raiz do projeto, executa o seguinte comando para construir e iniciar todos os serviços (Base de Dados, API de Dados e Interface):
-
+### 1. Ligar as máquinas
+Na pasta raiz do projeto, corre o comando:
 ```bash
 docker-compose up -d --build
 ```
 
-Após o comando terminar, os serviços estarão disponíveis em:
-*   **Interface Web:** [http://localhost:16001](http://localhost:16001)
-*   **API de Dados:** [http://localhost:16000](http://localhost:16000)
-*   **Documentação API (Swagger):** [http://localhost:16000/api-docs](http://localhost:16000/api-docs)
-
----
-
-## 📥 Povoamento da Base de Dados
-
-Para testar a plataforma com dados reais (utilizadores, recursos de UCs da UMinho, comentários e notícias), podes utilizar os scripts de povoamento incluídos.
-
-### Opção A: Povoamento Completo (Recomendado)
-Este script limpa a base de dados e carrega o cenário completo de demonstração.
-
-1. Entra no contentor da API:
-   ```bash
-   docker exec -it api_dados sh
-   ```
-2. Executa o script de povoamento:
-   ```bash
-   node scripts/populate_complete.js
-   ```
-
-### Opção B: Apenas utilizador Administrador
-Se preferires começar do zero mas precisares de uma conta de admin:
+### 2. Criar os dados de teste (Opcional)
+Se queres entrar e ver logo o portal cheio de vida (recursos, utilizadores e comentários), corre este comando:
 ```bash
-docker exec -it api_dados node scripts/clear-except-admin.js
+docker exec -it projeto_api_dados node scripts/populate_complete.js
 ```
 
 ---
 
-## 👤 Credenciais de Teste
+## 🔑 Onde estão as coisas?
 
-Após o povoamento completo, podes utilizar as seguintes contas (todas têm a password `password123`):
+Depois de ligares tudo, podes abrir no teu browser:
 
-| Utilizador | Role | Password |
-| :--- | :--- | :--- |
-| **jcr@di.uminho.pt** | Administrador | `password123` |
-| **prh@di.uminho.pt** | Produtor | `password123` |
-| **a10004@alunos.uminho.pt** | Consumidor | `password123` |
+*   **Portal (Interface):** [http://localhost:16001](http://localhost:16001)
+*   **Documentação da API:** [http://localhost:16000/api-docs](http://localhost:16000/api-docs)
 
----
+### Contas para usares:
+A password para todos é `password123`.
 
-## 🔒 Segurança e Acesso
-
-Por questões de segurança e boas práticas de arquitetura:
-*   **Interface Web:** Exposta em [http://localhost:16001](http://localhost:16001).
-*   **API de Dados:** Está **escondida** do mundo exterior (não tem mapeamento de portas para o host). A `interface` comunica com ela através da rede interna do Docker (`http://api_dados:16000`).
-*   **Base de Dados:** Exposta em `localhost:27017` para facilitar a inspeção manual (se necessário), mas protegida pela rede interna para a API.
+*   **Administrador:** `jcr@di.uminho.pt`
+*   **Produtor:** `prh@di.uminho.pt`
+*   **Consumidor:** `a10004@alunos.uminho.pt`
 
 ---
 
-## 🛠 Estrutura do Projeto
+## 📂 Organização do Código
 
-*   `/api_dados`: Backend Node.js/Express, gestão de ficheiros e lógica OAIS.
-*   `/interface`: Frontend Node.js/Pug/Tailwind CSS.
-*   `/storage/resources`: Local onde os ficheiros (AIP) são armazenados persistentemente.
-*   `docker-compose.yml`: Orquestração dos microserviços.
+*   `api_dados`: O "cérebro". Gere a base de dados e os ficheiros.
+*   `interface`: O que tu vês. Feito para ser simples e intuitivo.
+*   `data/db`: Onde o MongoDB guarda as informações.
+*   `api_dados/storage/resources`: Onde os teus ficheiros ficam guardados para sempre.
 
 ---
-**Autores:** Francisco Barbosa, Pedro Morais, Simão Araújo (2026)
+
+## 🛠️ Manutenção Rápida
+
+*   **Parar tudo:** `docker-compose down`
+*   **Limpar tudo (Hard Reset):** `docker-compose down -v` (isto apaga também os dados da base de dados).
+
+---
+**Criado por:** Francisco Barbosa, Pedro Morais & Simão Araújo (2026)
