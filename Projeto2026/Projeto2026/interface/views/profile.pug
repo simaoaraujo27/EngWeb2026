@@ -1,0 +1,72 @@
+extends layout
+
+block content
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
+    div(class="grid grid-cols-1 lg:grid-cols-3 gap-8")
+      
+      // Sidebar: Informação do Perfil
+      div(class="lg:col-span-1 space-y-6")
+        div(class="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden p-8")
+          div(class="text-center mb-6")
+            div(class="w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4")
+              = user.nome.charAt(0).toUpperCase()
+            h1(class="text-2xl font-bold text-edu-dark dark:text-white")= user.nome
+            p(class="text-sm text-gray-400 dark:text-slate-500")= user._id
+            span(class="inline-block mt-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider")
+              = user.nivel
+
+          div(class="space-y-4 border-t border-gray-50 dark:border-slate-800 pt-6")
+            div
+              p(class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1") Instituição
+              p(class="text-sm text-gray-700 dark:text-slate-300")= user.filiacao || 'Não definida'
+            div
+              p(class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1") Departamento
+              p(class="text-sm text-gray-700 dark:text-slate-300")= user.departamento || 'Não definido'
+            div
+              p(class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1") Curso
+              p(class="text-sm text-gray-700 dark:text-slate-300")= user.curso || 'Não definido'
+            div
+              p(class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1") Membro desde
+              p(class="text-sm text-gray-700 dark:text-slate-300")= new Date(user.dataRegisto).toLocaleDateString('pt-PT')
+
+          div(class="mt-8")
+            a(href="/profile/edit" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-edu-dark dark:bg-slate-800 text-white rounded-xl font-bold hover:bg-gray-800 dark:hover:bg-slate-700 transition-all")
+              i(data-lucide="edit-3" class="w-4 h-4")
+              | Editar Perfil
+
+      // Main Content: Listagem de Recursos
+      div(class="lg:col-span-2 space-y-6")
+        div(class="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden")
+          div(class="p-8 border-b border-gray-50 dark:border-slate-800 flex items-center justify-between")
+            div(class="flex items-center gap-3")
+              div(class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg")
+                i(data-lucide="package" class="text-blue-600 dark:text-blue-400 w-5 h-5")
+              h2(class="text-xl font-bold text-edu-dark dark:text-white") Os Meus Recursos
+            span(class="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 rounded-full text-xs font-bold")= resources.length
+          
+          if resources.length > 0
+            div(class="overflow-x-auto")
+              table(class="w-full")
+                thead(class="bg-gray-50 dark:bg-slate-800")
+                  tr
+                    th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest") Recurso
+                    th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-widest") Ações
+                tbody(class="divide-y divide-gray-50 dark:divide-slate-800")
+                  each r in resources
+                    tr(class="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors")
+                      td(class="px-8 py-4")
+                        a(href=`/resources/${r._id}` class="block group")
+                          p(class="text-sm font-bold text-edu-dark dark:text-white group-hover:text-primary transition-colors")= r.titulo
+                          p(class="text-[10px] text-gray-400 dark:text-slate-500")= r.tipo + " • " + (r.ano || 'S/ Ano')
+                      td(class="px-8 py-4 text-right")
+                        div(class="flex justify-end gap-2")
+                          a(href=`/resources/edit/${r._id}` class="p-2 text-gray-400 hover:text-primary transition-colors")
+                            i(data-lucide="settings-2" class="w-4 h-4")
+                          a(href=`/resources/download/${r._id}` class="p-2 text-gray-400 hover:text-primary transition-colors")
+                            i(data-lucide="download" class="w-4 h-4")
+          else
+            div(class="p-12 text-center")
+              div(class="w-16 h-16 bg-gray-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4")
+                i(data-lucide="folder-plus" class="text-gray-300 dark:text-slate-600 w-8 h-8")
+              p(class="text-gray-500 dark:text-slate-400 font-medium") Ainda não submeteu nenhum recurso.
+              a(href="/ingest" class="inline-block mt-4 text-primary font-bold hover:underline") Começar a partilhar

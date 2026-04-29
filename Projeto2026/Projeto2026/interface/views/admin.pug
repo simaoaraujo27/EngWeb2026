@@ -1,0 +1,102 @@
+extends layout
+
+block content
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
+    div(class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12")
+      div
+        h1(class="text-3xl font-extrabold text-edu-dark dark:text-white") Painel de Administração
+        p(class="text-edu-muted dark:text-slate-400") Gestão centralizada de utilizadores e recursos do sistema.
+      
+      div(class="flex gap-4")
+        button#restore-btn(class="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-300 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-slate-800 transition-all shadow-sm")
+            i(data-lucide="upload" class="w-5 h-5")
+            | Restaurar Dados (ZIP)
+        a(href="/admin/export" class="inline-flex items-center gap-2 px-6 py-3 bg-edu-dark dark:bg-slate-800 text-white rounded-xl font-bold hover:bg-gray-800 dark:hover:bg-slate-700 transition-all shadow-lg")
+            i(data-lucide="archive" class="w-5 h-5")
+            | Exportação Global (Backup)
+    
+    // Hidden Restore Form
+    form#restore-form(action="/admin-import" method="POST" enctype="multipart/form-data" class="hidden")
+        input#restore-file(type="file" name="zipFile" accept=".zip" onchange="document.getElementById('restore-form').submit()")
+
+    div(class="grid grid-cols-1 xl:grid-cols-2 gap-8")
+      // Users Management
+      div(class="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden")
+        div(class="p-8 border-b border-gray-50 dark:border-slate-800 flex items-center justify-between")
+          div(class="flex items-center gap-3")
+            div(class="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg")
+              i(data-lucide="users" class="text-purple-600 dark:text-purple-400 w-5 h-5")
+            h2(class="text-xl font-bold text-edu-dark dark:text-white") Utilizadores
+          span(class="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 rounded-full text-xs font-bold")= users.length
+        
+        div(class="overflow-x-auto")
+          table(class="w-full")
+            thead(class="bg-gray-50 dark:bg-slate-800/50")
+              tr
+                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Nome
+                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Nível
+                th(class="px-8 py-4 text-center text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Estado
+                th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Ações
+            tbody(class="divide-y divide-gray-50 dark:divide-slate-800")
+              each u in users
+                tr(class="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors")
+                  td(class="px-8 py-4")
+                    p(class="text-sm font-bold text-edu-dark dark:text-white")= u.nome
+                    p(class="text-xs text-gray-400 dark:text-slate-500")= u._id
+                  td(class="px-8 py-4")
+                    span(class="px-2 py-1 rounded-md text-[10px] font-bold uppercase " + (u.nivel=='admin' ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' : (u.nivel=='produtor' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400')))
+                      = u.nivel
+                  td(class="px-8 py-4 text-center")
+                    if u.ativo
+                      span(class="px-2 py-1 bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400 text-[10px] font-bold rounded-md uppercase") Ativo
+                    else
+                      span(class="px-2 py-1 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-[10px] font-bold rounded-md uppercase") Inativo
+                  td(class="px-8 py-4 text-right")
+                    if u.ativo
+                      a(href=`/admin/delete-user/${u._id}` class="p-2 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors" title="Desativar Conta" onclick="return confirm('Desativar conta do utilizador?')")
+                        i(data-lucide="user-minus" class="w-4 h-4")
+                    else
+                      a(href=`/admin/activate-user/${u._id}` class="p-2 text-gray-400 dark:text-slate-500 hover:text-green-600 dark:hover:text-green-400 transition-colors" title="Reativar Conta")
+                        i(data-lucide="user-check" class="w-4 h-4")
+
+      // Resources Management
+      div(class="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden")
+        div(class="p-8 border-b border-gray-50 dark:border-slate-800 flex items-center justify-between")
+          div(class="flex items-center gap-3")
+            div(class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg")
+              i(data-lucide="package" class="text-blue-600 dark:text-blue-400 w-5 h-5")
+            h2(class="text-xl font-bold text-edu-dark dark:text-white") Recursos
+          span(class="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 rounded-full text-xs font-bold")= resources.length
+        
+        div(class="overflow-x-auto")
+          table(class="w-full")
+            thead(class="bg-gray-50 dark:bg-slate-800/50")
+              tr
+                th(class="px-8 py-4 text-left text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Título
+                th(class="px-8 py-4 text-center text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Downloads
+                th(class="px-8 py-4 text-right text-xs font-bold text-gray-400 dark:text-slate-500 uppercase") Ações
+            tbody(class="divide-y divide-gray-50 dark:divide-slate-800")
+              each r in resources
+                tr(class="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors")
+                  td(class="px-8 py-4")
+                    p(class="text-sm font-bold text-edu-dark dark:text-white truncate max-w-[200px]")= r.titulo
+                    p(class="text-[10px] text-gray-400 dark:text-slate-500")= r.tipo
+                  td(class="px-8 py-4 text-center")
+                    span(class="text-sm font-medium text-gray-600 dark:text-slate-400")= r.downloads
+                  td(class="px-8 py-4 text-right")
+                    div(class="flex justify-end gap-2")
+                      a(href=`/resources/${r._id}` class="p-2 text-gray-400 dark:text-slate-500 hover:text-primary transition-colors")
+                        i(data-lucide="eye" class="w-4 h-4")
+                      a(href=`/admin/delete-resource/${r._id}` class="p-2 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors" onclick="return confirm('Eliminar recurso permanentemente?')")
+                        i(data-lucide="trash-2" class="w-4 h-4")
+
+    script.
+        document.getElementById('restore-btn').addEventListener('click', () => {
+            document.getElementById('restore-file').click();
+        });
+        
+        document.getElementById('restore-form').addEventListener('submit', () => {
+            document.getElementById('restore-btn').disabled = true;
+            document.getElementById('restore-btn').innerHTML = '<i data-lucide="loader-2" class="animate-spin w-5 h-5"></i> A restaurar...';
+            lucide.createIcons();
+        });

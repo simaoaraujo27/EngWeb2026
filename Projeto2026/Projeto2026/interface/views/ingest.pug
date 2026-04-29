@@ -1,0 +1,128 @@
+extends layout
+
+block content
+  div(class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12")
+    div(class="mb-8")
+      h1(class="text-3xl font-extrabold text-edu-dark dark:text-white") Submeter Novo Recurso
+      p(class="text-edu-muted dark:text-slate-400") Partilhe o seu conhecimento através de um pacote SIP (BagIt simplificado).
+
+    div(class="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-xl overflow-hidden")
+      div(class="p-8")
+        form(class="space-y-8" action="/ingest" method="POST" enctype="multipart/form-data")
+          div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
+            div(class="space-y-2 md:col-span-2")
+              label(class="text-sm font-bold text-gray-700 dark:text-slate-300") Título do Recurso
+              input(class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-white" type="text" name="titulo" placeholder="Ex: Manual de Engenharia Web" required)
+            
+            div(class="space-y-2 md:col-span-2")
+              label(class="text-sm font-bold text-gray-700 dark:text-slate-300") Subtítulo (opcional)
+              input(class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-white" type="text" name="subtitulo" placeholder="Informação adicional...")
+
+            div(class="space-y-2")
+              label(class="text-sm font-bold text-gray-700 dark:text-slate-300") Tipo de Material
+              div(class="relative")
+                select(class="w-full pl-4 pr-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none dark:text-white" name="tipo" required)
+                  option(value="tese") 🎓 Tese
+                  option(value="artigo") 📝 Artigo
+                  option(value="slides") 📊 Slides
+                  option(value="relatorio") 📄 Relatório
+                  option(value="aplicacao") 💻 Aplicação
+                  option(value="teste_exame") 📝 Teste / Exame
+                  option(value="problema_resolvido") 🧩 Problema Resolvido
+                i(data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-slate-500 pointer-events-none")
+
+            div(class="space-y-2")
+              label(class="text-sm font-bold text-gray-700 dark:text-slate-300") Ano de Publicação
+              input(class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-white" type="text" name="ano" placeholder="Ex: 2026" required)
+
+            div(class="space-y-2")
+              label(class="text-sm font-bold text-gray-700 dark:text-slate-300") Data de Criação (Opcional)
+              input(class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-white" type="date" name="dataCriacao")
+
+            div(class="space-y-2")
+              label(class="text-sm font-bold text-gray-700 dark:text-slate-300") Visibilidade
+              div(class="relative")
+                select(class="w-full pl-4 pr-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none dark:text-white" name="visibilidade")
+                  option(value="publico") 🔓 Público
+                  option(value="privado") 🔒 Privado
+                i(data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-slate-500 pointer-events-none")
+
+            div(class="space-y-2 md:col-span-2")
+              label(class="text-sm font-bold text-gray-700 dark:text-slate-300") Hashtags (separadas por vírgula)
+              div(class="relative")
+                i(data-lucide="hash" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-slate-500")
+                input(class="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-white" type="text" name="hashtags" placeholder="web, node, javascript")
+
+          div(class="space-y-4")
+            label(class="text-sm font-bold text-gray-700 dark:text-slate-300") Pacote SIP (Ficheiro ZIP)
+            div#drop-zone(class="border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-3xl p-12 text-center hover:border-primary dark:hover:border-primary hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all group relative")
+              input#zipFile(class="hidden" type="file" name="zipFile" accept=".zip" required)
+              label(class="cursor-pointer" for="zipFile")
+                div(class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform")
+                  i(data-lucide="upload-cloud" class="text-primary w-8 h-8")
+                div#file-info
+                  p(class="text-sm font-bold text-edu-dark dark:text-white") Seleciona o ficheiro ZIP
+                  p(class="text-xs text-gray-400 dark:text-slate-500 mt-1") O pacote deve conter o ficheiro manifest.txt
+                div#file-selected(class="hidden")
+                  p(class="text-sm font-bold text-primary" id="file-name")
+                  p(class="text-xs text-gray-400 dark:text-slate-500 mt-1") Clique para alterar o ficheiro
+
+          button#submit-btn(class="w-full py-4 bg-primary text-white rounded-2xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2" type="submit")
+            i(data-lucide="send" class="w-5 h-5")
+            span#btn-text Iniciar Processo de Ingestão
+
+    script.
+      const fileInput = document.getElementById('zipFile');
+      const fileInfo = document.getElementById('file-info');
+      const fileSelected = document.getElementById('file-selected');
+      const fileNameDisplay = document.getElementById('file-name');
+      const submitBtn = document.getElementById('submit-btn');
+      const btnText = document.getElementById('btn-text');
+      const form = document.querySelector('form');
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          const fileName = e.target.files[0].name;
+          fileNameDisplay.textContent = `📦 ${fileName}`;
+          fileInfo.classList.add('hidden');
+          fileSelected.classList.remove('hidden');
+          document.getElementById('drop-zone').classList.add('border-primary', 'bg-blue-50/30');
+        }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Feedback visual simples
+        submitBtn.disabled = true;
+        btnText.textContent = 'A processar submissão...';
+
+        const formData = new FormData(form);
+
+        try {
+          const response = await fetch('/ingest', {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            alert('✨ Recurso submetido com sucesso!');
+            window.location.href = `/resources/${result._id}`;
+          } else {
+            const errorData = await response.json();
+            if (errorData.validacoes) {
+                alert('❌ Erro de Validação no Pacote SIP. Verifique o ficheiro manifest.');
+            } else {
+                alert('❌ Erro: ' + (errorData.message || 'Falha na submissão'));
+            }
+            window.location.reload();
+          }
+        } catch (error) {
+          alert('Erro na ligação ao servidor. Verifique se o ZIP é válido.');
+          console.error(error);
+          submitBtn.disabled = false;
+          btnText.textContent = 'Iniciar Processo de Ingestão';
+        }
+      });

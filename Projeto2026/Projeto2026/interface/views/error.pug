@@ -1,0 +1,31 @@
+extends layout
+
+block content
+  div(class="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50 dark:bg-slate-950 px-4 transition-colors")
+    div(class="max-w-md w-full text-center")
+      div(class="mb-8 inline-flex items-center justify-center w-20 h-20 bg-red-50 dark:bg-red-900/20 rounded-3xl")
+        i(data-lucide="alert-triangle" class="text-red-500 w-10 h-10")
+      
+      h1(class="text-4xl font-extrabold text-edu-dark dark:text-white mb-4")= title || '404'
+      h2(class="text-xl font-bold text-gray-700 dark:text-slate-300 mb-2")= message || 'Página não encontrada'
+      
+      if error && error.validacoes
+        div(class="mt-8 p-6 bg-white dark:bg-slate-900 border border-red-100 dark:border-red-900/30 rounded-3xl text-left shadow-sm")
+          h3(class="text-sm font-bold text-red-600 mb-4 flex items-center gap-2")
+            i(data-lucide="clipboard-list" class="w-4 h-4")
+            | Relatório de Erros de Ingestão
+          div(class="space-y-3")
+            each v in error.validacoes
+              div(class="p-3 bg-red-50/50 dark:bg-red-900/10 rounded-xl border border-red-50 dark:border-red-900/20")
+                p(class="text-xs font-bold text-red-700 dark:text-red-400")= v.componente + ": " + v.status
+                p(class="text-xs text-red-600 dark:text-red-300 mt-0.5")= v.erro
+      else if error && error.message
+        p(class="text-edu-muted dark:text-slate-400 mb-8")= error.message
+      else
+        p(class="text-edu-muted dark:text-slate-400 mb-8") Pedimos desculpa, mas a página que procura não existe ou foi movida.
+      
+      div(class="flex flex-col sm:flex-row gap-4 justify-center")
+        a(href="/" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20")
+          | Voltar à Página Principal
+        a(href="/help" class="px-6 py-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-slate-700 transition-all")
+          | Centro de Ajuda
