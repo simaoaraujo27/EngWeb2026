@@ -16,14 +16,14 @@ RUN npm ci --only=production && npm cache clean --force
 COPY . .
 
 # Criar diretório para uploads com permissões apropriadas
-RUN mkdir -p storage uploads && chmod 755 storage uploads
+RUN mkdir -p storage uploads && chmod 777 storage uploads
 
-# Não executar como root
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 && \
-    chown -R nodejs:nodejs /usr/src/app
+# Comentado para evitar problemas de permissão com volumes montados (UID mismatch)
+# RUN addgroup -g 1001 -S nodejs && \
+#     adduser -S nodejs -u 1001 && \
+#     chown -R nodejs:nodejs /usr/src/app
 
-USER nodejs
+# USER nodejs
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

@@ -13,7 +13,7 @@ const authz = require('../auth/authorization');
 
 // Configuração do multer com limite de tamanho
 const upload = multer({ 
-    dest: 'uploads/',
+    dest: '/tmp/',
     limits: { 
         fileSize: parseInt(process.env.MAX_FILE_SIZE) || 500 * 1024 * 1024 // 500MB
     }
@@ -178,14 +178,16 @@ router.post('/ingest', auth.verificaAcesso, authz.requireProducer, upload.single
         const result = await Resource.insert(resourceData);
         
         // --- GERAR NOTÍCIA AUTOMÁTICA (API side) ---
-        try {
-            await News.insert({
-                conteudo: `Nova submissão: O produtor ${req.user.nome} disponibilizou um(a) ${req.body.tipo} entitulado(a) "${req.body.titulo}".`,
-                tipo: 'submissao',
-                resourceId: resourceId
-            });
-        } catch (newsErr) {
-            console.error('Error generating submission news:', newsErr);
+        if (resourceData.visibilidade !== 'privado') {
+            try {
+                await News.insert({
+                    conteudo: `Nova submissão: O produtor ${req.user.nome} disponibilizou um(a) ${req.body.tipo} entitulado(a) "${req.body.titulo}".`,
+                    tipo: 'submissao',
+                    resourceId: resourceId
+                });
+            } catch (newsErr) {
+                console.error('Error generating submission news:', newsErr);
+            }
         }
 
         try {
@@ -211,7 +213,7 @@ router.post('/ingest', auth.verificaAcesso, authz.requireProducer, upload.single
 });
 
 // --- Rota de Download de Ficheiro Individual ---
-router.get('/:id/file/:filename', async (req, res) => {
+router.get('/:id/file/:filename', auth.autenticacaoOpcional, async (req, res) => {
     try {
         const resourceId = req.params.id;
         const filename = req.params.filename;
@@ -223,6 +225,13 @@ router.get('/:id/file/:filename', async (req, res) => {
         const resource = await Resource.getResource(resourceId);
         if (!resource) {
             return res.status(404).json({ message: "Recurso não encontrado." });
+        }
+
+        // Verificar visibilidade
+        if (resource.visibilidade === 'privado') {
+            if (!req.user || (req.user.nivel !== 'admin' && req.user._id !== resource.produtor)) {
+                return res.status(404).json({ message: "Recurso não encontrado." });
+            }
         }
 
         // Encontrar o metadado do ficheiro para obter o caminho relativo correto
@@ -263,7 +272,7 @@ router.get('/download/:id', auth.autenticacaoOpcional, async (req, res) => {
         // Verificar visibilidade para download
         if (resource.visibilidade === 'privado') {
             if (!req.user || (req.user.nivel !== 'admin' && req.user._id !== resource.produtor)) {
-                return res.status(403).json({ message: "Acesso Negado para download: Este recurso é privado." });
+                return res.status(404).json({ message: "Recurso não encontrado." });
             }
         }
 
@@ -336,7 +345,7 @@ router.get('/:id', auth.autenticacaoOpcional, async (req, res) => {
         // Verificar visibilidade
         if (resource.visibilidade === 'privado') {
             if (!req.user || (req.user.nivel !== 'admin' && req.user._id !== resource.produtor)) {
-                return res.status(403).json({ message: "Acesso Negado: Este recurso é privado." });
+                return res.status(404).json({ message: "Recurso não encontrado" });
             }
         }
 

@@ -6,7 +6,7 @@ const FormData = require('form-data');
 const fs = require('fs');
 
 const API_URL = process.env.API_URL || "http://localhost:16000";
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: '/tmp/' });
 
 // Middleware para verificar se o utilizador está autenticado
 const verifyToken = (req, res, next) => {
@@ -76,6 +76,7 @@ router.post('/ingest', verifyToken, upload.single('zipFile'), async (req, res) =
         form.append('tipo', req.body.tipo);
         form.append('dataCriacao', req.body.dataCriacao || '');
         form.append('produtor', user._id);
+        form.append('visibilidade', req.body.visibilidade || 'publico');
         
         const tags = req.body.hashtags ? req.body.hashtags.split(',').map(s => s.trim()) : [];
         form.append('hashtags', JSON.stringify(tags));
@@ -97,11 +98,14 @@ router.post('/ingest', verifyToken, upload.single('zipFile'), async (req, res) =
         
         const rid = response.data.resourceId || response.data._id || (response.data.resource && response.data.resource._id);
 
-        await axios.post(`${API_URL}/news`, { 
-            conteudo: `Novo recurso: ${req.body.titulo}`, 
-            tipo: 'submissao',
-            resourceId: rid
-        }, { headers: { Authorization: req.cookies.token } });
+        // Notícia só se for público
+        if (req.body.visibilidade !== 'privado') {
+            await axios.post(`${API_URL}/news`, { 
+                conteudo: `Novo recurso: ${req.body.titulo}`, 
+                tipo: 'submissao',
+                resourceId: rid
+            }, { headers: { Authorization: req.cookies.token } });
+        }
 
         res.status(200).json({ _id: rid });
 
@@ -161,6 +165,9 @@ router.get('/resources/download/:id', verifyToken, async (req, res) => {
         res.set('Content-Disposition', `attachment; filename="DIP-${req.params.id}.zip"`);
         response.data.pipe(res);
     } catch (error) {
+        if (error.response && error.response.status === 404) {
+            return res.status(404).render('error', { title: 'Recurso Não Encontrado', message: 'O recurso que procura não existe ou é privado.' });
+        }
         res.render('error', { message: 'Erro ao descarregar recurso', error: error });
     }
 });
@@ -208,6 +215,9 @@ router.get('/resources/:id', async (req, res) => {
             ratingCount: countRatings
         });
     } catch (error) {
+        if (error.response && error.response.status === 404) {
+            return res.status(404).render('error', { title: 'Recurso Não Encontrado', message: 'O recurso que procura não existe ou é privado.' });
+        }
         res.render('error', { message: 'Erro ao carregar detalhes do recurso', error: error });
     }
 });
@@ -404,7 +414,9 @@ router.post('/resources/edit/:id', verifyToken, async (req, res) => {
         await axios.put(`${API_URL}/resources/${req.params.id}`, req.body, config);
         
         // Notícia (tipo submissao para passar na API sem ser admin)
-        try { await axios.post(`${API_URL}/news`, { conteudo: `Recurso atualizado: ${req.body.titulo}`, tipo: 'submissao', resourceId: req.params.id }, config); } catch (e) {}
+        if (req.body.visibilidade !== 'privado') {
+            try { await axios.post(`${API_URL}/news`, { conteudo: `Recurso atualizado: ${req.body.titulo}`, tipo: 'submissao', resourceId: req.params.id }, config); } catch (e) {}
+        }
         
         res.redirect(`/resources/${req.params.id}`);
     } catch (error) { res.status(404).render('error'); }
