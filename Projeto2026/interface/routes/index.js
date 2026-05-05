@@ -122,14 +122,15 @@ router.post('/ingest', verifyToken, upload.single('zipFile'), async (req, res) =
 // GET Listagem de Recursos
 router.get('/resources', async (req, res) => {
     try {
-        let queryParams = '';
-        if (req.query.tipo) queryParams = `?tipo=${req.query.tipo}`;
-        else if (req.query.hashtag) queryParams = `?hashtag=${req.query.hashtag}`;
-        else if (req.query.ano) queryParams = `?ano=${req.query.ano}`;
-        else if (req.query.produtor) queryParams = `?produtor=${req.query.produtor}`;
+        const params = new URLSearchParams();
+        if (req.query.tipo) params.append('tipo', req.query.tipo);
+        if (req.query.hashtag) params.append('hashtag', req.query.hashtag);
+        if (req.query.ano) params.append('ano', req.query.ano);
+        if (req.query.produtor) params.append('produtor', req.query.produtor);
         
+        const queryString = params.toString() ? `?${params.toString()}` : '';
         const config = req.cookies.token ? { headers: { Authorization: req.cookies.token } } : {};
-        const response = await axios.get(`${API_URL}/resources${queryParams}`, config);
+        const response = await axios.get(`${API_URL}/resources${queryString}`, config);
         
         let anos = [];
         try {
@@ -247,6 +248,28 @@ router.get('/admin/delete-user/:id', verifyAdmin, async (req, res) => {
     } catch (error) { res.status(404).render('error'); }
 });
 
+router.get('/admin/activate-user/:id', verifyAdmin, async (req, res) => {
+    try {
+        await axios.put(`${API_URL}/users/${req.params.id}`, { ativo: true }, { headers: { Authorization: req.cookies.token } });
+        res.redirect('/admin');
+    } catch (error) { res.status(404).render('error'); }
+});
+
+router.get('/resources/delete/:id', verifyToken, async (req, res) => {
+    try {
+        const config = { headers: { Authorization: req.cookies.token } };
+        const response = await axios.get(`${API_URL}/resources/${req.params.id}`, config);
+        const user = JSON.parse(req.cookies.user);
+        
+        if (response.data.produtor !== user._id && user.nivel !== 'admin') {
+            return res.status(403).render('error', { title: 'Acesso Negado', message: 'Não tem permissão para apagar este recurso.' });
+        }
+
+        await axios.delete(`${API_URL}/resources/${req.params.id}`, config);
+        res.redirect('/resources');
+    } catch (error) { res.status(404).render('error'); }
+});
+
 router.get('/admin/export', verifyAdmin, async (req, res) => {
     try {
         const response = await axios({ url: `${API_URL}/admin/export`, method: 'GET', headers: { Authorization: req.cookies.token }, responseType: 'stream' });
@@ -329,7 +352,6 @@ router.post('/register', async (req, res) => {
     try {
         if (req.body.password !== req.body.confirm_password) return res.render('register', { error: "As passwords não coincidem." });
         await axios.post(`${API_URL}/users`, req.body);
-        await axios.post(`${API_URL}/news`, { conteudo: `Novo utilizador registado: ${req.body.nome}`, tipo: 'utilizador' });
         res.redirect('/login');
     } catch (error) { res.render('register', { error: "Erro no registo." }); }
 });

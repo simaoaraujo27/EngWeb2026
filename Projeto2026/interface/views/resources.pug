@@ -14,8 +14,13 @@ block content
         div
           h3(class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-4") Categorias
           div(class="flex flex-col gap-1")
-            each type in [{v: '', l: 'Todos os Recursos'}, {v: 'tese', l: '🎓 Teses'}, {v: 'artigo', l: '📝 Artigos'}, {v: 'slides', l: '📊 Slides'}, {v: 'relatorio', l: '📄 Relatórios'}, {v: 'aplicacao', l: '💻 Aplicações'}]
-              a(href=type.v ? `/resources?tipo=${type.v}` : '/resources'
+            each type in [{v: '', l: 'Todos os Recursos'}, {v: 'tese', l: '🎓 Teses'}, {v: 'artigo', l: '📝 Artigos'}, {v: 'slides', l: '📊 Slides'}, {v: 'relatorio', l: '📄 Relatórios'}, {v: 'aplicacao', l: '💻 Aplicações'}, {v: 'teste_exame', l: '📝 Testes / Exames'}, {v: 'problema_resolvido', l: '🧩 Probl. Resolvidos'}]
+              - var typeUrl = '/resources?'
+              - if (type.v) typeUrl += 'tipo=' + type.v
+              - if (queryAno) typeUrl += (type.v ? '&' : '') + 'ano=' + queryAno
+              - if (queryHashtag) typeUrl += (type.v || queryAno ? '&' : '') + 'hashtag=' + queryHashtag
+              
+              a(href=typeUrl
                 class=(!type.v && !queryTipo) || (queryTipo == type.v) ? 'px-4 py-2 rounded-xl text-sm font-bold bg-primary/10 text-primary' : 'px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors'
               )= type.l
 
@@ -23,7 +28,11 @@ block content
           h3(class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-4") Filtrar por Ano
           div(class="grid grid-cols-2 gap-2")
             each ano in anos
-              a(href=`/resources?ano=${ano}`
+              - var anoUrl = '/resources?ano=' + ano
+              - if (queryTipo) anoUrl += '&tipo=' + queryTipo
+              - if (queryHashtag) anoUrl += '&hashtag=' + queryHashtag
+              
+              a(href=anoUrl
                 class=(queryAno == ano) ? 'px-3 py-2 rounded-xl text-xs font-bold bg-primary text-white text-center shadow-md' : 'px-3 py-2 rounded-xl text-xs font-medium bg-white dark:bg-slate-900 text-gray-600 dark:text-slate-400 border border-gray-100 dark:border-slate-800 hover:border-primary text-center transition-all'
               )= ano
 

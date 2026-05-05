@@ -62,6 +62,8 @@ block content
                         div(class="flex justify-end gap-2")
                           a(href=`/resources/edit/${r._id}` class="p-2 text-gray-400 hover:text-primary transition-colors")
                             i(data-lucide="settings-2" class="w-4 h-4")
+                          a(href=`/resources/delete/${r._id}` class="p-2 text-gray-400 hover:text-red-600 transition-colors" onclick="return confirm('Eliminar este recurso permanentemente?')")
+                            i(data-lucide="trash-2" class="w-4 h-4")
                           a(href=`/resources/download/${r._id}` class="p-2 text-gray-400 hover:text-primary transition-colors")
                             i(data-lucide="download" class="w-4 h-4")
           else

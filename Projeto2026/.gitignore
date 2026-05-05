@@ -9,13 +9,15 @@ yarn-error.log*
 .env.local
 
 # Docker & DB
-data/db/
+data/
+
+# Storage & Resources
+api_dados/storage/resources/*
+!api_dados/storage/resources/.gitkeep
 
 # Uploads
-api_dados/uploads/*
-interface/uploads/*
+**/uploads/*
 
 # OS
 .DS_Store
 Thumbs.db
-

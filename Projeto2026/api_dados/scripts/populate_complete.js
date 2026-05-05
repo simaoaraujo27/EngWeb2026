@@ -44,8 +44,9 @@ async function populate() {
         const tipos = ['slides', 'relatorio', 'teste_exame', 'problema_resolvido', 'tese', 'artigo', 'aplicacao'];
         const anos = ['2022', '2023', '2024', '2025', '2026'];
 
-        // Gerar 35 recursos variados
-        for (let i = 1; i <= 35; i++) {
+        const totalResources = 1000;
+        // Gerar 1000 recursos variados
+        for (let i = 1; i <= totalResources; i++) {
             const uc = ucs[i % ucs.length];
             const tipo = tipos[i % tipos.length];
             const ano = anos[i % anos.length];
